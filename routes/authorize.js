@@ -1,8 +1,9 @@
 var express = require('express');
 var router = express.Router();
 var Discogs = require('disconnect').Client;
+const cors = require('cors');
 
-router.get('/', function(req, res,next){
+router.get('/', cors(), function(req, res,next){
         
 	var oAuth = new Discogs().oauth();
 	oAuth.getRequestToken(
