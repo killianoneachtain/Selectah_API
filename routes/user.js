@@ -5,6 +5,7 @@ const cors = require('cors');
 
 var collectorsItems;
 var noOfPages;
+var pagination;
 
 /* GET users listing. */
 router.get('/', cors(), function(req, res, next) {
@@ -13,14 +14,19 @@ router.get('/', cors(), function(req, res, next) {
 
 router.get('/collection', cors(), function(req, res, next) {  
   var col = new Discogs({userToken: 'lYVtKyeISQGrTaFWvhONqkFfvbexIAIsrNiJhvAf'}).user().collection();
-   
   
-  col.getReleases('konsouloz', 0, {per_page:250},
+  col.getReleases('konsouloz', 0, {per_page:1000},
    function(err, data){
-      console.log(data);
-      res.json(data.releases);
+      //console.log(data);
+      //pagination =res.json(data.pagination);
+      //console.log("Number of Pages: "+pagination.pages);
+      res.json(data.releases);//
     });
   
 });
 
 module.exports = router;
+
+function getEntireCollection(string ,res){
+
+}
