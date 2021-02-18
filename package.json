@@ -10,10 +10,11 @@
     "cors": "^2.8.5",
     "debug": "~2.6.9",
     "disconnect": "^1.2.2",
-    "express": "~4.16.1",
+    "express": "^4.16.4",
     "http-errors": "~1.6.3",
     "jade": "~1.11.0",
+    "merge-json-file": "^1.0.1",
     "morgan": "~1.9.1",
-    "uglify-js": "^3.12.7"
+    "uglify-js": "^3.12.8"
   }
 }
