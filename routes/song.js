@@ -9,8 +9,13 @@ router.get('/:song_artist/:song_title', cors(), function(req, res, next) {
   
     /* use the artist field and title field
     */
-        const Artist = req.params.song_artist;
-        const Track = req.params.song_title;
+        let Artist = req.params.song_artist;
+        Artist.includes('(')
+        { 
+          let temp = Artist.split('(')[0].trim();
+          Artist = temp;
+        }
+        let Track = req.params.song_title;
         console.log("Artist : ",Artist, "Title : ",Track);  
         
         const spotifyApi = new SpotifyWebApi({
@@ -46,15 +51,19 @@ router.get('/:song_artist/:song_title', cors(), function(req, res, next) {
                     track.artists.forEach(function(artiste, Aindex)
                     {
                         console.log(index + ': ' + artiste.name + ' - ' + track.name + ' (' + track.id + ')');
-                        if((artiste.name.trim() == Artist.trim()) && (track.name.trim() == Track.trim()))
+                        if((artiste.name.toLowerCase().trim() == Artist.toLowerCase().trim()) && (track.name.trim() == Track.trim()))
                         {
                             console.log("WE HAVE A MATCH");
                             spotifyApi.getAudioAnalysisForTrack(`${track.id}`).then(
                                 function(data) 
                                 {
-                                    //console.log(data.body);
-                                    console.log("BPM IS : ",data.body.track.tempo);      
+                                    //console.log(data.body.track);
+                                    console.log("BPM IS : ",Number((data.body.track.tempo).toFixed(0)));  
+                                    console.log("Tempo Confidence IS : ",data.body.track.tempo_confidence);  
+                                    console.log("Key  IS : ",data.body.track.key);
+                                    console.log("Key confidence IS : ",data.body.track.key_confidence);      
                                 })
+                                
                         }
                         else
                         { 

@@ -77,7 +77,11 @@ router.get('/release/:releaseId', cors(), function(req, res, next) {
    db.getRelease(req.params.releaseId, function(err, data){
     //console.log(data);
     // cache and timestamp
-    res.json(data.tracklist);
+    
+    //CHANGE BACK TO THIS
+    //res.json(data.tracklist);
+
+    res.json(data);
   });  
 });
 
