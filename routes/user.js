@@ -77,8 +77,29 @@ router.get('/release/:releaseId', cors(), function(req, res, next) {
    db.getRelease(req.params.releaseId, function(err, data){
     //console.log(data);
     // cache and timestamp
-    res.json(data.tracklist);
+    
+    //CHANGE BACK TO THIS
+    //res.json(data.tracklist);
+
+    res.json(data);
   });  
 });
+
+router.get('/genres/', cors(), function(req, res, next) {
+    var genres = [ {"genres": [
+      { id: 1, name:"Electronic" },
+      { id: 2, name:"Hip Hop" },
+      { id: 3, name:"Rock" },
+      { id: 4, name:"Rap" },
+      { id: 6, name:"Funk / Soul" },
+      { id: 7, name:"Latin" },
+      { id: 8, name:"Pop" },
+      { id: 9, name:"Jazz" }
+        ]
+      }
+    ];  
+    res.json(genres[0]);    
+  });  
+
 
 module.exports = router;
