@@ -86,7 +86,7 @@ router.get('/release/:releaseId', cors(), function(req, res, next) {
 });
 
 router.get('/genres/', cors(), function(req, res, next) {
-    var genres = [ {"genres": [
+    var genres = [ {"genres": [      
       { id: 1, name:"Electronic" },
       { id: 2, name:"Hip Hop" },
       { id: 3, name:"Rock" },

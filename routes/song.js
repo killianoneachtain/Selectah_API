@@ -15,8 +15,25 @@ router.get('/:song_artist/:song_title', cors(), function(req, res, next) {
           let temp = Artist.split('(')[0].trim();
           Artist = temp;
         }
+
+        Artist.includes('&')
+        { 
+          let temp = Artist.split('&')[0].trim();
+          Artist = temp.trim();
+        }
+
+
         let Track = req.params.song_title;
-        console.log("Artist : ",Artist, "Title : ",Track);  
+        let Mix = "";
+        Track.includes("(")
+        {
+          let temp = Track.split('(')[0].trim();
+          Mix = Track.split('(')[1].split(')')[0].trim();
+          Track = temp.trim();
+        }
+
+
+        console.log("Artist : ",Artist, "Title : ",Track, "Mix :",Mix);  
         
         const spotifyApi = new SpotifyWebApi({
             clientId: 'fd323724c7db406187a9a00ff6519101',
@@ -38,6 +55,7 @@ router.get('/:song_artist/:song_title', cors(), function(req, res, next) {
                 })
                 .then(function(data) {
                 // Print some information about the results
+                return res.json(data);
                 console.log('I got ' + data.body.tracks.total + ' results!');
             
                 // Go through the first page of results
