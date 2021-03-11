@@ -10,22 +10,21 @@ router.get('/:song_artist/:song_title', cors(), function(req, res, next) {
     /* use the artist field and title field
     */
         let Artist = req.params.song_artist;
-        Artist.includes('(')
+        if (Artist.includes('('))
         { 
           let temp = Artist.split('(')[0].trim();
           Artist = temp;
         }
 
-        Artist.includes('&')
+        if(Artist.includes('&'))
         { 
           let temp = Artist.split('&')[0].trim();
           Artist = temp.trim();
         }
 
-
         let Track = req.params.song_title;
         let Mix = "";
-        Track.includes("(")
+        if(Track.includes("("))
         {
           let temp = Track.split('(')[0].trim();
           Mix = Track.split('(')[1].split(')')[0].trim();
@@ -55,7 +54,7 @@ router.get('/:song_artist/:song_title', cors(), function(req, res, next) {
                 })
                 .then(function(data) {
                 // Print some information about the results
-                return res.json(data);
+                return res.json(data.body.tracks);
                 console.log('I got ' + data.body.tracks.total + ' results!');
             
                 // Go through the first page of results
