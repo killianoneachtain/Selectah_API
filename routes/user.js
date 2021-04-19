@@ -27,7 +27,7 @@ router.get('/collection', cors(), function(req, res, next) {
         noOfPages =data.pagination.pages;   
         //console.log(noOfPages);   
         //completeCollection = getAllReleases(parseInt(noOfPages))
-        res.json(data.releases); 
+        res.json(data); 
         //res.json(data.releases);
     });  
 });
@@ -74,14 +74,8 @@ function getAllReleases(pages)
    /* GET releases track listing. */
 router.get('/release/:releaseId', cors(), function(req, res, next) {
   var dis = new Discogs('MyUserAgent/1.0', {userToken: 'lYVtKyeISQGrTaFWvhONqkFfvbexIAIsrNiJhvAf'});
-   db.getRelease(req.params.releaseId, function(err, data){
-    //console.log(data);
-    // cache and timestamp
-    
-    //CHANGE BACK TO THIS
-    //res.json(data.tracklist);
-
-    res.json(data);
+   db.getRelease(req.params.releaseId, function(err, data){ 
+        res.json(data);
   });  
 });
 
