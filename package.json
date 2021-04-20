@@ -16,7 +16,7 @@
     "jade": "^1.11.0",
     "jstransformer": "^1.0.0",
     "merge-json-file": "^1.0.1",
-    "morgan": "~1.9.1",   
+    "morgan": "~1.9.1",
     "spotify-web-api-node": "^5.0.2",
     "uglify-js": "^3.12.8"
   }
