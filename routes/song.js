@@ -20,7 +20,7 @@ router.get('/:trackId', cors(), function (req, res,next) {
       //console.log('The access token is ' + data.body['access_token']);          
       // Save the access token so that it's used in future calls
       spotifyApi.setAccessToken(data.body['access_token']);
-      spotifyApi.getAudioAnalysisForTrack(`${track.id}`).then(
+      spotifyApi.getAudioAnalysisForTrack(`${req.params.trackId}`).then(
         function(data) 
         {
             //console.log(data.body.track);
@@ -28,7 +28,8 @@ router.get('/:trackId', cors(), function (req, res,next) {
             console.log("Tempo Confidence IS : ",data.body.track.tempo_confidence);  
             console.log("Key  IS : ",data.body.track.key);
             console.log("Key confidence IS : ",data.body.track.key_confidence);      
-        }) }).catch(function(err) {
+        })
+       }).catch(function(err) {
           console.log('Something went wrong in GET Audio Analysis', err.message);
           });  
        
