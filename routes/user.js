@@ -22,10 +22,11 @@ router.get('/', cors(), function(req, res, next) {
 router.get('/collection', cors(), function(req, res, next) {  
     var col = new Discogs({userToken: 'lYVtKyeISQGrTaFWvhONqkFfvbexIAIsrNiJhvAf'}).user().collection();
   
-    col.getReleases('konsouloz', 0, {per_page:50},
+    col.getReleases('konsouloz', 0, {per_page:50, sort:"added"},
     function(err, data){
         noOfPages =data.pagination.pages;   
-        //console.log(noOfPages);   
+        console.log(err);
+       // console.log(noOfPages);   
         //completeCollection = getAllReleases(parseInt(noOfPages))
         res.json(data); 
         //res.json(data.releases);
