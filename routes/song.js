@@ -10,14 +10,30 @@ router.get('/:song_artist/:song_title', cors(), function(req, res, next) {
     /* use the artist field and title field
     */
         let Artist = req.params.song_artist;
-        Artist.includes('(')
+        if (Artist.includes('('))
         { 
           let temp = Artist.split('(')[0].trim();
           Artist = temp;
         }
+
+        if(Artist.includes('&'))
+        { 
+          let temp = Artist.split('&')[0].trim();
+          Artist = temp.trim();
+        }
+
         let Track = req.params.song_title;
-        console.log("Artist : ",Artist, "Title : ",Track);  
+        let Mix = "";
+        if(Track.includes("("))
+        {
+          let temp = Track.split('(')[0].trim();
+          Mix = Track.split('(')[1].split(')')[0].trim();
+          Track = temp.trim();
+        }
+
+        console.log("Artist : ",Artist, "Title : ",Track, "Mix :",Mix);  
         
+
         const spotifyApi = new SpotifyWebApi({
             clientId: 'fd323724c7db406187a9a00ff6519101',
             clientSecret: 'fbafa9ca1ce642e9b19738978503314a'
@@ -34,10 +50,11 @@ router.get('/:song_artist/:song_title', cors(), function(req, res, next) {
               spotifyApi.setAccessToken(data.body['access_token']);
                           
                 // Use the access token to retrieve information about the user connected to it
-                return spotifyApi.searchTracks(`${Artist} ${Track}`);
+                return spotifyApi.searchTracks(`${Artist} ${Track}`,  { limit : 50 });
                 })
                 .then(function(data) {
                 // Print some information about the results
+                return res.json(data.body.tracks);
                 console.log('I got ' + data.body.tracks.total + ' results!');
             
                 // Go through the first page of results
