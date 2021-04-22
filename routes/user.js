@@ -22,12 +22,13 @@ router.get('/', cors(), function(req, res, next) {
 router.get('/collection', cors(), function(req, res, next) {  
     var col = new Discogs({userToken: 'lYVtKyeISQGrTaFWvhONqkFfvbexIAIsrNiJhvAf'}).user().collection();
   
-    col.getReleases('konsouloz', 0, {per_page:50},
+    col.getReleases('konsouloz', 0, {per_page:50, sort:"added"},
     function(err, data){
         noOfPages =data.pagination.pages;   
-        //console.log(noOfPages);   
+        console.log(err);
+       // console.log(noOfPages);   
         //completeCollection = getAllReleases(parseInt(noOfPages))
-        res.json(data.releases); 
+        res.json(data); 
         //res.json(data.releases);
     });  
 });
@@ -74,15 +75,13 @@ function getAllReleases(pages)
    /* GET releases track listing. */
 router.get('/release/:releaseId', cors(), function(req, res, next) {
   var dis = new Discogs('MyUserAgent/1.0', {userToken: 'lYVtKyeISQGrTaFWvhONqkFfvbexIAIsrNiJhvAf'});
-   db.getRelease(req.params.releaseId, function(err, data){
-    //console.log(data);
-    // cache and timestamp
-    res.json(data.tracklist);
+   db.getRelease(req.params.releaseId, function(err, data){ 
+        res.json(data);
   });  
 });
 
 router.get('/genres/', cors(), function(req, res, next) {
-    var genres = [ {"genres": [
+    var genres = [ {"genres": [      
       { id: 1, name:"Electronic" },
       { id: 2, name:"Hip Hop" },
       { id: 3, name:"Rock" },
