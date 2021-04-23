@@ -26,7 +26,7 @@ router.get('/collection', cors(), function(req, res, next) {
     function(err, data){
         noOfPages =data.pagination.pages;   
         console.log(err);
-       // console.log(noOfPages);   
+        console.log(noOfPages);   
         //completeCollection = getAllReleases(parseInt(noOfPages))
         res.json(data); 
         //res.json(data.releases);
