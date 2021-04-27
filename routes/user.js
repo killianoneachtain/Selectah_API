@@ -4,6 +4,20 @@ var Discogs = require('disconnect').Client;
 const cors = require('cors');
 const fs = require('fs');
 var db = new Discogs().database();
+const tracks = require('../models/release')
+
+var USER = express();
+
+//Import the mongoose module
+var mongoose = require('mongoose');
+//Set up default mongoose connection
+var mongoDB = 'mongodb+srv://21tcqbg73uip45jv7bhr3p6za:MoW@x057xx@selectah.jcl8g.mongodb.net/selectah?retryWrites=true&w=majority';
+mongoose.connect(mongoDB, {useNewUrlParser: true, useUnifiedTopology: true});
+//Get the default connection
+var db = mongoose.connection;
+//Bind connection to error event (to get notification of connection errors)
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+
 
 var dis = new Discogs({
 	consumerKey: 'rSlgSvPFNYXtkYClvjLs', 
@@ -33,51 +47,57 @@ router.get('/collection', cors(), function(req, res, next) {
     });  
 });
 
-function getAllReleases(pages)
-{
-     //noOfPages =data.pagination.pages;   
-        //console.log(noOfPages);
-  var col = new Discogs({userToken: 'lYVtKyeISQGrTaFWvhONqkFfvbexIAIsrNiJhvAf'}).user().collection();
-
-  var strings="";
-  var news="";
-  var together = "";
-  console.log(" I is : ", pages);
-
-    for(i = 1;i<=pages;i++)
-    {
-    //console.log("length of strings",strings.length);
-     col.getReleases('konsouloz', 0, {page: `${i}`, per_page:50},
-    function(err, data){
-        news = JSON.stringify(data.releases); 
-        news = news.substring(1);
-        var n = news.lastIndexOf("]");
-        news = news.substring(0,n) + ',';
-        console.log("length of news now is : ",news.length);     
-        strings += news;   
-        console.log("length of strings",strings.length); 
-        
-        console.log("i : ", i);
-        console.log("pages", pages);
-        
-        if(i>pages)
-        {
-          var l = strings.length;
-          var set = `[${strings}]`;
-          strings = JSON.parse(set);
-          console.log("SET : ",strings);
-        } 
-        });  
-    } 
-    return strings;  
-   };
-
-   /* GET releases track listing. */
+/* GET releases track listing. */
 router.get('/release/:releaseId', cors(), function(req, res, next) {
-  var dis = new Discogs('MyUserAgent/1.0', {userToken: 'lYVtKyeISQGrTaFWvhONqkFfvbexIAIsrNiJhvAf'});
-   db.getRelease(req.params.releaseId, function(err, data){ 
-        res.json(data);
-  });  
+
+  var release = req.params.releaseId;
+  console.log("Release_id", release);
+  var exists = false;
+  Release.count({_id: release}, function (err, count){ 
+    if(count>0){
+        console.log("It Does Exist");
+        exists = true;
+    }
+}); 
+  
+
+  if(exists == false)
+  {   var dis = new Discogs('MyUserAgent/1.0', {userToken: 'lYVtKyeISQGrTaFWvhONqkFfvbexIAIsrNiJhvAf'});
+      var stuff = "";
+      db.getRelease(req.params.releaseId, function(err, data)
+      { 
+          stuff=res.json(data);
+          res.json(data);
+      });   
+
+      USER.post('/stuff', (req, res, next) => {
+        const release = new Release({
+          discogsReleaseID: req.params.releaseId,
+          artist: stuff.artist,
+          title: stuff.title,   
+          updated: stuff.date_changed,
+          tracklist: stuff.tracklist
+        });
+        thing.save().then(
+          () => {
+            res.status(201).json({
+              message: 'Post saved successfully!'
+            });
+          }
+        ).catch(
+          (error) => {
+            res.status(400).json({
+              error: error
+            });
+          }
+        );
+      }); 
+      
+  }
+  else
+  { 
+    console.log('The release DOES exist')
+  }  
 });
 
 router.get('/genres/', cors(), function(req, res, next) {

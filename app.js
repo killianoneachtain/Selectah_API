@@ -6,6 +6,8 @@ var logger = require('morgan');
 var bodyParser = require('body-parser');
 //Import the mongoose module
 var mongoose = require('mongoose');
+const Release = require('./models/release');
+
 
 //Set up default mongoose connection
 var mongoDB = 'mongodb+srv://21tcqbg73uip45jv7bhr3p6za:MoW@x057xx@selectah.jcl8g.mongodb.net/selectah?retryWrites=true&w=majority';
@@ -16,12 +18,6 @@ var db = mongoose.connection;
 
 //Bind connection to error event (to get notification of connection errors)
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-  
-var nameSchema = new mongoose.Schema({    
-    id: String
-   });
-
-var User = mongoose.model("User",nameSchema);
 
 var indexRouter = require('./routes/index');
 var authorizeRouter = require('./routes/authorize');
@@ -33,20 +29,6 @@ var app = express();
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
-
-
-
-  app.post("/adduser/:spotfiy_id", (err, req, res, next) => {
-    var myData = new User(req.params.spotify_id);
-    myData.save()
-    .then(item => {
-    res.send("item saved to database");
-    })
-    .catch(err => {
-    res.status(400).send("unable to save to database");
-    });
-   });
-
 
 app.use(logger('dev'));
 app.use(express.json());
