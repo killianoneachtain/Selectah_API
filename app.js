@@ -3,11 +3,11 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-var bodyParser = require('body-parser');
 //Import the mongoose module
 var mongoose = require('mongoose');
-const Release = require('./models/release');
-
+mongoose.set('useNewUrlParser', true);
+mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
 
 //Set up default mongoose connection
 var mongoDB = 'mongodb+srv://21tcqbg73uip45jv7bhr3p6za:MoW@x057xx@selectah.jcl8g.mongodb.net/selectah?retryWrites=true&w=majority';

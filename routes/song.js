@@ -91,44 +91,15 @@ router.get('/:song_artist/:song_title', cors(), function(req, res, next) {
                 // Use the access token to retrieve information about the user connected to it
                 return spotifyApi.searchTracks(`${Artist} ${Track}`,  { limit : 50 });
                 })
-                .then(function(data) {
+                .then(function(data) 
+                {
                 // Print some information about the results
-                console.log('I got ' + data.body.tracks.total + ' results!');
-                return res.json(data.body.tracks);               
-            
-                // Go through the first page of results
-                var firstPage = data.body.tracks.items;
-                //console.log(firstPage);
-                //console.log('The tracks in the first page are (popularity in parentheses):');
-                
-                
-                firstPage.forEach(function(track, index) {
-                    //console.log(index + ': '  + ' - ' + track.name + ' (' + track.popularity + ')');
-                    track.artists.forEach(function(artiste, Aindex)
-                    {
-                        console.log(index + ': ' + artiste.name + ' - ' + track.name + ' (' + track.id + ')');
-                        if((artiste.name.toLowerCase().trim() == Artist.toLowerCase().trim()) && (track.name.trim() == Track.trim()))
-                        {
-                            console.log("WE HAVE A MATCH");
-                            spotifyApi.getAudioAnalysisForTrack(`${track.id}`).then(
-                                function(data) 
-                                {
-                                    //console.log(data.body.track);
-                                    console.log("BPM IS : ",Number((data.body.track.tempo).toFixed(0)));  
-                                    console.log("Tempo Confidence IS : ",data.body.track.tempo_confidence);  
-                                    console.log("Key  IS : ",data.body.track.key);
-                                    console.log("Key confidence IS : ",data.body.track.key_confidence);      
-                                })
-                                
-                        }
-                        else
-                        { 
-                            console.log("NO MATCH");
-                        }
-                    })
-                });
-                }).catch(function(err) {
-                console.log('Something went wrong in the mainFlow:', err.message);
+                  console.log('There are ' + data.body.tracks.total + ' results!');
+                  return res.json(data.body.tracks); 
+               
+                }).catch(function(err) 
+                {
+                  console.log('Something went wrong in the mainFlow:', err.message);
                 });  
              
             },
