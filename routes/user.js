@@ -35,6 +35,7 @@ router.get('/collection', cors(), function(req, res, next) {
 router.get('/collection/:pageNumber', cors(), function(req, res, next) {  
   var col = new Discogs({userToken: 'lYVtKyeISQGrTaFWvhONqkFfvbexIAIsrNiJhvAf'}).user().collection();
 
+  console.log(`Page number : ${req.params.pageNumber}`)
   col.getReleases('konsouloz', 0, {per_page:50, sort:"added", page:req.params.pageNumber},
   function(err, data){  
       res.json(data);         
