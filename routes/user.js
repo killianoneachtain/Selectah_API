@@ -1,84 +1,81 @@
 var express = require('express');
-var router = express.Router();
-var Discogs = require('disconnect').Client;
 const cors = require('cors');
 const fs = require('fs');
+const Release = require('../models/release')
+const mongoUtil = require('../utilities/mongo');
+
+//var selectah_db = app.mongo.getDb();
+
+var router = express.Router();
+var Discogs = require('disconnect').Client;
 var db = new Discogs().database();
 
-var dis = new Discogs({
-	consumerKey: 'rSlgSvPFNYXtkYClvjLs', 
-	consumerSecret: 'QRabRHFedozJinKOvopMUCKeCepaCJLn'
-});
-
-var collectorsItems= [];
-var noOfPages=0;
-var completeCollection="";
 
 /* GET users listing. */
 router.get('/', cors(), function(req, res, next) {
   res.render('user', { title: 'USER : Killian' });
 });
 
+router.get('/pages', cors(), function(req, res, next) {  
+  var col = new Discogs({userToken: 'lYVtKyeISQGrTaFWvhONqkFfvbexIAIsrNiJhvAf'}).user().collection();
+
+  col.getReleases('konsouloz', 0, {per_page:50, sort:"added"},
+  function(err, data){
+      //Pages =data.pagination;
+      //console.log("Pages" , Pages);           
+      res.json(data.pagination);         
+  });  
+});
+
 router.get('/collection', cors(), function(req, res, next) {  
     var col = new Discogs({userToken: 'lYVtKyeISQGrTaFWvhONqkFfvbexIAIsrNiJhvAf'}).user().collection();
   
     col.getReleases('konsouloz', 0, {per_page:50, sort:"added"},
-    function(err, data){
-        noOfPages =data.pagination.pages;   
-        console.log(err);
-        console.log(noOfPages);   
-        //completeCollection = getAllReleases(parseInt(noOfPages))
-        res.json(data); 
-        //res.json(data.releases);
+    function(err, data){  
+        res.json(data);         
     });  
 });
 
-function getAllReleases(pages)
-{
-     //noOfPages =data.pagination.pages;   
-        //console.log(noOfPages);
+router.get('/collection/:pageNumber', cors(), function(req, res, next) {  
   var col = new Discogs({userToken: 'lYVtKyeISQGrTaFWvhONqkFfvbexIAIsrNiJhvAf'}).user().collection();
 
-  var strings="";
-  var news="";
-  var together = "";
-  console.log(" I is : ", pages);
-
-    for(i = 1;i<=pages;i++)
-    {
-    //console.log("length of strings",strings.length);
-     col.getReleases('konsouloz', 0, {page: `${i}`, per_page:50},
-    function(err, data){
-        news = JSON.stringify(data.releases); 
-        news = news.substring(1);
-        var n = news.lastIndexOf("]");
-        news = news.substring(0,n) + ',';
-        console.log("length of news now is : ",news.length);     
-        strings += news;   
-        console.log("length of strings",strings.length); 
-        
-        console.log("i : ", i);
-        console.log("pages", pages);
-        
-        if(i>pages)
-        {
-          var l = strings.length;
-          var set = `[${strings}]`;
-          strings = JSON.parse(set);
-          console.log("SET : ",strings);
-        } 
-        });  
-    } 
-    return strings;  
-   };
-
-   /* GET releases track listing. */
-router.get('/release/:releaseId', cors(), function(req, res, next) {
-  var dis = new Discogs('MyUserAgent/1.0', {userToken: 'lYVtKyeISQGrTaFWvhONqkFfvbexIAIsrNiJhvAf'});
-   db.getRelease(req.params.releaseId, function(err, data){ 
-        res.json(data);
+  console.log(`Page number : ${req.params.pageNumber}`)
+  col.getReleases('konsouloz', 0, {per_page:50, sort:"added", page:req.params.pageNumber},
+  function(err, data){  
+      res.json(data);         
   });  
 });
+
+/* GET releases track listing. */ 
+   router.get('/release/:releaseId', cors(), function(req, res, next) 
+   {
+    var dis = new Discogs('MyUserAgent/1.0', {userToken: 'lYVtKyeISQGrTaFWvhONqkFfvbexIAIsrNiJhvAf'});
+
+    console.log("The release ID is : ",req.params.releaseId);
+    var releaseData = [];
+
+      db.getRelease(req.params.releaseId, async function(err, data){ 
+          releaseData = await data;
+          console.log('Release Data is : ', releaseData.id);
+
+
+          data = await Release.findByDiscogsID(releaseData.id);
+          
+          //          var checker = db.collection( 'users' ).find();
+         
+
+          //check if the release id is in the mongo db
+          // if it is return that one
+          // if not then create an entry for the release.
+
+
+          res.json(data);
+          
+    });     
+    
+  });
+
+
 
 router.get('/genres/', cors(), function(req, res, next) {
     var genres = [ {"genres": [      
