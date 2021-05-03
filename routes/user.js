@@ -1,10 +1,14 @@
 var express = require('express');
-var router = express.Router();
-var Discogs = require('disconnect').Client;
 const cors = require('cors');
 const fs = require('fs');
-var db = new Discogs().database();
+const Release = require('../models/release')
+const mongoUtil = require('../utilities/mongo');
 
+//var selectah_db = app.mongo.getDb();
+
+var router = express.Router();
+var Discogs = require('disconnect').Client;
+var db = new Discogs().database();
 
 
 /* GET users listing. */
@@ -46,10 +50,32 @@ router.get('/collection/:pageNumber', cors(), function(req, res, next) {
    router.get('/release/:releaseId', cors(), function(req, res, next) 
    {
     var dis = new Discogs('MyUserAgent/1.0', {userToken: 'lYVtKyeISQGrTaFWvhONqkFfvbexIAIsrNiJhvAf'});
-     db.getRelease(req.params.releaseId, function(err, data){ 
+
+    console.log("The release ID is : ",req.params.releaseId);
+    var releaseData = [];
+
+      db.getRelease(req.params.releaseId, async function(err, data){ 
+          releaseData = await data;
+          console.log('Release Data is : ', releaseData.id);
+
+
+          data = await Release.findByDiscogsID(releaseData.id);
+          
+          //          var checker = db.collection( 'users' ).find();
+         
+
+          //check if the release id is in the mongo db
+          // if it is return that one
+          // if not then create an entry for the release.
+
+
           res.json(data);
-    });  
+          
+    });     
+    
   });
+
+
 
 router.get('/genres/', cors(), function(req, res, next) {
     var genres = [ {"genres": [      

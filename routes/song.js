@@ -95,6 +95,7 @@ router.get('/:song_artist/:song_title', cors(), function(req, res, next) {
                 {
                 // Print some information about the results
                   console.log('There are ' + data.body.tracks.total + ' results!');
+                  //console.log(data.body.tracks)
                   return res.json(data.body.tracks); 
                
                 }).catch(function(err) 
