@@ -10,7 +10,6 @@ var router = express.Router();
 var Discogs = require('disconnect').Client;
 var db = new Discogs().database();
 
-
 /* GET users listing. */
 router.get('/', cors(), function(req, res, next) {
   res.render('user', { title: 'USER : Killian' });
@@ -36,11 +35,11 @@ router.get('/collection', cors(), function(req, res, next) {
     });  
 });
 
-router.get('/collection/:pageNumber', cors(), function(req, res, next) {  
+router.get('/:userName/collection/:pageNumber', cors(), function(req, res, next) {  
   var col = new Discogs({userToken: 'lYVtKyeISQGrTaFWvhONqkFfvbexIAIsrNiJhvAf'}).user().collection();
 
   console.log(`Page number : ${req.params.pageNumber}`)
-  col.getReleases('konsouloz', 0, {per_page:50, sort:"added", page:req.params.pageNumber},
+  col.getReleases(req.params.userName, 0, {per_page:50, sort:"added", page:req.params.pageNumber},
   function(err, data){  
       res.json(data);         
   });  
@@ -56,7 +55,8 @@ router.get('/collection/:pageNumber', cors(), function(req, res, next) {
 
       db.getRelease(req.params.releaseId, async function(err, data){ 
           releaseData = await data;
-          //console.log('Release Data is : ', releaseData.id);
+
+          //console.log('Release Data is : ', releaseData);
           data = await Release.findByDiscogsID(releaseData.id);
           //console.log("data is ",data);
           if(data == null){

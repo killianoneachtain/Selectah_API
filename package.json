@@ -6,6 +6,7 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "auth0": "^2.34.2",
     "body-parser": "^1.19.0",
     "constantinople": "^4.0.1",
     "cookie-parser": "~1.4.5",
