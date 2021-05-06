@@ -8,7 +8,19 @@ const mongoUtil = require('../utilities/mongo');
 
 var router = express.Router();
 var Discogs = require('disconnect').Client;
+
 var db = new Discogs().database();
+
+/* GET Check a Username exists on Discogs */
+router.get('/check/:name', cors(), function(req,res, next) {
+  var col = new Discogs({userToken: 'lYVtKyeISQGrTaFWvhONqkFfvbexIAIsrNiJhvAf'}).user();
+  
+  console.log("The name to check is ", req.params.name)
+
+  col.getProfile(req.params.name, function(err,data) {
+    res.json(data);
+  } )
+})
 
 /* GET users listing. */
 router.get('/', cors(), function(req, res, next) {
@@ -81,9 +93,7 @@ router.get('/:userName/collection/:pageNumber', cors(), function(req, res, next)
     });         
   });
 
-
-
-router.get('/genres/', cors(), function(req, res, next) {
+router.get('/genres', cors(), function(req, res, next) {
     var genres = [ {"genres": [      
       { id: 1, name:"Electronic" },
       { id: 2, name:"Hip Hop" },
