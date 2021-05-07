@@ -18,7 +18,7 @@ connectToServer: function ( callback ) {
     mongoose.connect(mongoDB, {useNewUrlParser: true, useUnifiedTopology: true},
         function ( err, client ) {
         db = mongoose.connection;
-        console.log("Connected to Mongo using ", process.env.selectahDataBase)
+        //console.log("Connected to Mongo using ", process.env.selectahDataBase)
         db.on('error', console.error.bind(console, 'MongoDB connection error:'));
         return callback( err);
     } ); 
