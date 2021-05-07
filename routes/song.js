@@ -10,12 +10,18 @@ var spotifyTr = new Track;
 
 
 /* GET Track Audio Analysis */
-router.get('/:track_id', cors(), function (req, res,next) {
+router.get('/:artist/:album_title/:track_title/:track_id', cors(), function (req, res,next) {
   const spotifyApi = new SpotifyWebApi({
     clientId: 'fd323724c7db406187a9a00ff6519101',
     clientSecret: 'fbafa9ca1ce642e9b19738978503314a'
   });
   
+  console.log("Artist  :", req.params.artist)
+  console.log("Album Title :", req.params.album_title)
+  console.log("Track title :", req.params.track_title)
+
+  console.log("Track id :", req.params.track_id)
+
   var token="";
 
   // Retrieve an access token
@@ -25,7 +31,7 @@ router.get('/:track_id', cors(), function (req, res,next) {
       //console.log('The access token is ' + data.body['access_token']);          
       // Save the access token so that it's used in future calls
       spotifyApi.setAccessToken(data.body['access_token']);
-      spotifyApi.getAudioAnalysisForTrack(`${req.params.track.track_id}`).then(
+      spotifyApi.getAudioAnalysisForTrack(`${req.params.track_id}`).then(
         function(data) 
         {
             //console.log(data.body.track);
