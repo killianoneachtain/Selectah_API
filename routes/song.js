@@ -3,14 +3,25 @@ var router = express.Router();
 const cors = require('cors');
 const fs = require('fs');
 const SpotifyWebApi = require('spotify-web-api-node');
+const Track = require('../models/track');
+
+var discogsTr = new Track;
+var spotifyTr = new Track;
+
 
 /* GET Track Audio Analysis */
-router.get('/:trackId', cors(), function (req, res,next) {
+router.get('/:artist/:album_title/:track_title/:track_id', cors(), function (req, res,next) {
   const spotifyApi = new SpotifyWebApi({
     clientId: 'fd323724c7db406187a9a00ff6519101',
     clientSecret: 'fbafa9ca1ce642e9b19738978503314a'
   });
   
+  console.log("Artist  :", req.params.artist)
+  console.log("Album Title :", req.params.album_title)
+  console.log("Track title :", req.params.track_title)
+
+  console.log("Track id :", req.params.track_id)
+
   var token="";
 
   // Retrieve an access token
@@ -20,7 +31,7 @@ router.get('/:trackId', cors(), function (req, res,next) {
       //console.log('The access token is ' + data.body['access_token']);          
       // Save the access token so that it's used in future calls
       spotifyApi.setAccessToken(data.body['access_token']);
-      spotifyApi.getAudioAnalysisForTrack(`${req.params.trackId}`).then(
+      spotifyApi.getAudioAnalysisForTrack(`${req.params.track_id}`).then(
         function(data) 
         {
             //console.log(data.body.track);
@@ -44,10 +55,12 @@ router.get('/:trackId', cors(), function (req, res,next) {
 
 
    /* GET releases track listing. */
-router.get('/:song_artist/:song_title', cors(), function(req, res, next) {
+router.get('/:song_artist/:album_title/:song_title', cors(), function(req, res, next) {
   
     /* use the artist field and title field
     */
+        const albumTitle = req.params.album_title;
+
         let Artist = req.params.song_artist;
         if (Artist.includes('('))
         { 
@@ -70,8 +83,17 @@ router.get('/:song_artist/:song_title', cors(), function(req, res, next) {
           Track = temp.trim();
         }
 
-        console.log("Artist : ",Artist, "Title : ",Track, "Mix :",Mix);  
+        //console.log("Artist : ",Artist,"Album Name : ",albumTitle, "Title : ",Track, "Mix :",Mix);  
         
+        discogsTr = ({
+          artist: Artist,
+          album: albumTitle,
+          trackName: Track,
+          Mix: Mix,
+        });
+
+        console.log(discogsTr);
+
 
         const spotifyApi = new SpotifyWebApi({
             clientId: 'fd323724c7db406187a9a00ff6519101',

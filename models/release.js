@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 const ReleaseSchema = new mongoose.Schema({  
     Discogs_id: {type: Number, required: true},
-    artists: {type : Schema.Types.ObjectId, ref: 'Artist'},
+    artists: Array,
     artists_sort: String,
     date_changed: String,
     master_id: Number,
@@ -25,9 +25,10 @@ ReleaseSchema.statics.findByType = function(type) {
   return this.findOne({ type : type});
 };
 
-ReleaseSchema.statics.save = function(id)
+ReleaseSchema.statics.save = function()
 {
-  return this.save(id);
+  return this.save();
 }
+
 
 module.exports = mongoose.model('Release', ReleaseSchema);
