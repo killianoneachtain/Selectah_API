@@ -92,7 +92,7 @@ router.get('/:userName/collection/:pageNumber', cors(), function(req, res, next)
               tracklist: data.tracklist
             });
             let release = await newRelease.save();
-            console.log("New Release Added", release);
+            //console.log("New Release Added", release);
           }
           res.json(data);          
     });         

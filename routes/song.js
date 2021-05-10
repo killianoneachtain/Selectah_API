@@ -9,8 +9,8 @@ var discogsTr = new Track;
 var spotifyTr = new Track;
 
 
-/* GET Track Audio Analysis */
-router.get('/:artist/:album_title/:track_title/:track_id', cors(), function (req, res,next) {
+/* GET Track Audio Analysis from Spotify */
+router.get('/:userID/:discogs_track_DB_ID/:artist/:album_title/:track_title/:track_id', cors(), function (req, res,next) {
   const spotifyApi = new SpotifyWebApi({
     clientId: 'fd323724c7db406187a9a00ff6519101',
     clientSecret: 'fbafa9ca1ce642e9b19738978503314a'
@@ -54,12 +54,12 @@ router.get('/:artist/:album_title/:track_title/:track_id', cors(), function (req
     );                   
 
 
-   /* GET releases track listing. */
-router.get('/:song_artist/:album_title/:song_title', cors(), function(req, res, next) {
+   /* GET tracks that match the discogs track from Spotify. */
+router.get('/:releaseID/:song_artist/:album_title/:song_title', cors(), function(req, res, next) {
   
     /* use the artist field and title field
     */
-        const albumTitle = req.params.album_title;
+        const albumTitle = req.params.album_title
 
         let Artist = req.params.song_artist;
         if (Artist.includes('('))
@@ -85,15 +85,20 @@ router.get('/:song_artist/:album_title/:song_title', cors(), function(req, res, 
 
         //console.log("Artist : ",Artist,"Album Name : ",albumTitle, "Title : ",Track, "Mix :",Mix);  
         
-        discogsTr = ({
+        discogsTr = ({    
+          releaseID: req.params.releaseID,      
           artist: Artist,
           album: albumTitle,
           trackName: Track,
           Mix: Mix,
         });
 
-        console.log(discogsTr);
+        //console.log("Discogs Track", discogsTr);
 
+        //write to mongoTrack db here, so that
+        // you can return the object id to the app
+        // this id is sent along with the chosen
+        // track for string comparison.
 
         const spotifyApi = new SpotifyWebApi({
             clientId: 'fd323724c7db406187a9a00ff6519101',
