@@ -8,12 +8,13 @@ const Track = require('../models/track');
 require('dotenv').config();
 
    /* GET releases track listing. */
-router.get('/:releaseID/:song_artist/:album_title/:song_title', cors(), async function(req, res, next) {
+router.get('/:userID/:releaseID/:song_artist/:album_title/:song_title', cors(), async function(req, res, next) {
   
     /* use the artist field and title field
     */
         const albumTitle = req.params.album_title;
         const releaseID = req.params.releaseID;
+        const userID = req.params.userID;
 
         let Artist = req.params.song_artist;
         if (Artist.includes('('))
@@ -40,7 +41,8 @@ router.get('/:releaseID/:song_artist/:album_title/:song_title', cors(), async fu
         //console.log("Artist : ",Artist,"Album Name : ",albumTitle, "Title : ",Track, "Mix :",Mix);  
         
         const newTrack = new Track({
-            releaseID: releaseID,
+          userID: userID,
+          releaseID: releaseID,
           artist: Artist,
           album: albumTitle,
           trackName: TrackName,
@@ -91,5 +93,10 @@ router.get('/:releaseID/:song_artist/:album_title/:song_title', cors(), async fu
               );
             }
           );   
+
+    router.get('/:userID/deleteTracks', cors(), async function(req, res, next) {
+        let response = await Track.deleteByUserID(req.params.userID)
+    });
+  
 
 module.exports = router;

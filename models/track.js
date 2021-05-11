@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 
 var TrackSchema = new mongoose.Schema({ 
+    userID: {type: String},  
     releaseID: {type: String},
     artist: {type: String},
     album: {type: String},
@@ -20,6 +21,14 @@ var TrackSchema = new mongoose.Schema({
   TrackSchema.statics.findByArtist = function(artist) {
     return this.findOne({ artist : artist});
   };
+
+  TrackSchema.statics.findByUserID = function(userID) {
+    return this.find({ userID : userID});
+  };
+
+  TrackSchema.statics.deleteByUserID = function(userID) {
+    return this.deleteMany({ userID : userID})
+  }
   
   TrackSchema.statics.save = function()
   {
