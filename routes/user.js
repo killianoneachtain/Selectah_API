@@ -3,6 +3,7 @@ const cors = require('cors');
 const fs = require('fs');
 const Release = require('../models/release')
 const mongoUtil = require('../utilities/mongo');
+require('dotenv').config();
 
 //var selectah_db = app.mongo.getDb();
 
@@ -14,34 +15,20 @@ var db = new Discogs().database();
 router.get('/check/:name', cors(), function(req,res, next) {
   var col = new Discogs({userToken: process.env.Discogs_App_Token}).user();
   
-  console.log("The name to check is ", req.params.name)
-
+  //console.log("The name to check is ", req.params.name)
   col.getProfile(req.params.name, function(err,data) {
     res.json(data);
   } )
 })
 
 /* GET users pagination details. */
-router.get('/pages', cors(), function(req, res, next) {  
-  var col = new Discogs({userToken: process.env.Discogs_App_Token}).user().collection();
-
-  col.getReleases('konsouloz', 0, {per_page:50, sort:"added"},
-  function(err, data){
-      //Pages =data.pagination;
-      //console.log("Pages" , Pages);           
-      res.json(data.pagination);         
-  });  
-});
-
-
-/* GET users pagination details. */
-router.get('/:userName/pages', cors(), function(req, res, next) {  
+router.get('/pagination/:userName/', cors(), function(req, res, next) {  
   var col = new Discogs({userToken: process.env.Discogs_App_Token}).user().collection();
 
   col.getReleases(req.params.userName, 0, {per_page:50, sort:"added"},
   function(err, data){
       //Pages =data.pagination;
-      //console.log("Pages" , Pages);           
+      //console.log("Pages for : ", req.params.userName);           
       res.json(data.pagination);         
   });  
 });
@@ -75,7 +62,9 @@ router.get('/:userName/collection/:pageNumber', cors(), function(req, res, next)
           //console.log('Release Data is : ', releaseData);
           data = await Release.findByDiscogsID(releaseData.id);
           //console.log("data is ",data);
-          if(data == null){
+
+          if(data == null)
+          {
             data = releaseData;
             console.log("data is", data);
 
@@ -91,7 +80,7 @@ router.get('/:userName/collection/:pageNumber', cors(), function(req, res, next)
               tracklist: data.tracklist
             });
             let release = await newRelease.save();
-            //console.log("New Release Added", release);
+            console.log("New Release Added", release);
           }
           res.json(data);          
     });         

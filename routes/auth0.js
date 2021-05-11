@@ -2,12 +2,13 @@ var express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 var router = express.Router();
+require('dotenv').config();
 
 router.get('/change_metadata/:user_id/:verified_name', cors(), function(req, res, next) {  
   
-   console.log("Here trying to get auth0 stuff");
-   console.log("User :", req.params.user_id);
-   console.log("New Collection Name :", req.params.verified_name);  
+   //console.log("Here trying to get auth0 stuff");
+   //console.log("User :", req.params.user_id);
+   //console.log("New Collection Name :", req.params.verified_name);  
 
    const User = encodeURIComponent(req.params.user_id)
 
