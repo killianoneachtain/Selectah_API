@@ -278,7 +278,6 @@ router.get('/:song_artist/:album_title/:song_title', cors(), function(req, res, 
 
         console.log(discogsTr);
 
-
         const spotifyApi = new SpotifyWebApi({
             clientId: process.env.SpotifyClientID,
             clientSecret: process.env.SpotifyClientSecret
