@@ -190,24 +190,25 @@ const SpotifyWebApi = require('spotify-web-api-node');
 const Track = require('../models/track');
 require('dotenv').config();
 
-var discogsTr = new Track;
-var spotifyTr = new Track;
-
-
 /* GET Track Audio Analysis */
 router.get('/:artist/:album_title/:track_title/:track_id', cors(), function (req, res,next) {
-  const spotifyApi = new SpotifyWebApi({
-    clientId: process.env.SpotifyClientID,
-    clientSecret: process.env.SpotifyClientSecret
-  });
+  
   console.log("Artist  :", req.params.artist)
   console.log("Album Title :", req.params.album_title)
   console.log("Track title :", req.params.track_title)
-
   console.log("Track id :", req.params.track_id)
 
-  var token="";
+  // i need to see if the track coming in matches the track that is selected
+  // from the discogs track list.
+  // need the objectid of the track.
 
+
+  const spotifyApi = new SpotifyWebApi({
+    clientId: process.env.SpotifyClientID,
+    clientSecret: process.env.SpotifyClientSecret
+  });  
+
+  var token="";
   // Retrieve an access token
   spotifyApi.clientCredentialsGrant().then(
     function(data) {
@@ -231,93 +232,15 @@ router.get('/:artist/:album_title/:track_title/:track_id', cors(), function (req
       },
       function(err) {
         console.log(
-          'Something went wrong when retrieving an access token in the function getSpotifyToken()',
+          'Something went wrong when retrieving an access token in the function gettingAudioAnalysis()',
           err.message
         );
       }
-    );                   
+    );  
 
+module.exports = router;
 
-   /* GET releases track listing. */
-router.get('/:song_artist/:album_title/:song_title', cors(), function(req, res, next) {
-  
-    /* use the artist field and title field
-    */
-        const albumTitle = req.params.album_title;
-
-        let Artist = req.params.song_artist;
-        if (Artist.includes('('))
-        { 
-          let temp = Artist.split('(')[0].trim();
-          Artist = temp;
-        }
-
-        if(Artist.includes('&'))
-        { 
-          let temp = Artist.split('&')[0].trim();
-          Artist = temp.trim();
-        }
-
-        let Track = req.params.song_title;
-        let Mix = "";
-        if(Track.includes("("))
-        {
-          let temp = Track.split('(')[0].trim();
-          Mix = Track.split('(')[1].split(')')[0].trim();
-          Track = temp.trim();
-        }
-
-        //console.log("Artist : ",Artist,"Album Name : ",albumTitle, "Title : ",Track, "Mix :",Mix);  
-        
-        discogsTr = ({
-          artist: Artist,
-          album: albumTitle,
-          trackName: Track,
-          Mix: Mix,
-        });
-
-        console.log(discogsTr);
-
-        const spotifyApi = new SpotifyWebApi({
-            clientId: process.env.SpotifyClientID,
-            clientSecret: process.env.SpotifyClientSecret
-          });
-          
-          var token="";
-    
-          // Retrieve an access token
-          spotifyApi.clientCredentialsGrant().then(
-            function(data) {
-              //console.log('The access token expires in ' + data.body['expires_in']);
-              //console.log('The access token is ' + data.body['access_token']);          
-              // Save the access token so that it's used in future calls
-              spotifyApi.setAccessToken(data.body['access_token']);
-                          
-                // Use the access token to retrieve information about the user connected to it
-                return spotifyApi.searchTracks(`artist:${Artist} track:${Track}`,  { limit : 50 });
-                })
-                .then(function(data) 
-                {
-                // Print some information about the results
-                  console.log('There are ' + data.body.tracks.total + ' results!');
-                  //console.log(data.body.tracks)
-                  return res.json(data.body.tracks); 
-               
-                }).catch(function(err) 
-                {
-                  console.log('Something went wrong in the mainFlow:', err.message);
-                });  
-             
-            },
-            function(err) {
-              console.log(
-                'Something went wrong when retrieving an access token in the function getSpotifyToken()',
-                err.message
-              );
-            }
-          );                   
-;
-
+/*
 function getSpotifyToken() 
 {   
   const spotifyApi = new SpotifyWebApi({
@@ -344,6 +267,5 @@ function getSpotifyToken()
           );
         }
       );
-}
-
-module.exports = router;
+} 
+*/

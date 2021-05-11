@@ -49,22 +49,26 @@ router.get('/:userName/collection/:pageNumber', cors(), function(req, res, next)
  * If the Discogs Release ID is found in the Selecta: Releases
  * database, then the Atlas record is returned to the app.
 */ 
-   router.get('/release/:releaseId', cors(), function(req, res, next) 
+   router.get('/release/:releaseId', cors(), async function(req, res, next) 
    {
     var dis = new Discogs('MyUserAgent/1.0', {userToken: process.env.Discogs_App_Token});
 
     //console.log("The release ID is : ",req.params.releaseId);
     var releaseData = [];
 
-      db.getRelease(req.params.releaseId, async function(err, data){ 
+    data = await Release.findByDiscogsID(req.params.releaseId);
+    console.log("data for initial check", data)
+    
+    if(data === null)
+      {
+          db.getRelease(req.params.releaseId, async function(err, data){ 
           releaseData = await data;
-
           //console.log('Release Data is : ', releaseData);
           data = await Release.findByDiscogsID(releaseData.id);
-          //console.log("data is ",data);
-
+          //console.log("data is ",data); 
           if(data == null)
-          {
+            {
+          
             data = releaseData;
             console.log("data is", data);
 
@@ -79,11 +83,16 @@ router.get('/:userName/collection/:pageNumber', cors(), function(req, res, next)
               styles: data.styles,
               tracklist: data.tracklist
             });
-            let release = await newRelease.save();
-            console.log("New Release Added", release);
-          }
-          res.json(data);          
-    });         
+              let release = await newRelease.save();
+              console.log("New Release Added", release);
+            }
+            res.json(data);          
+          });  
+      }
+      else 
+      { 
+        res.json(data);
+      }       
   });
 
 router.get('/genres', cors(), function(req, res, next) {

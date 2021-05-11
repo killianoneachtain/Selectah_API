@@ -8,7 +8,7 @@ const Track = require('../models/track');
 require('dotenv').config();
 
    /* GET releases track listing. */
-router.get('/:userID/:releaseID/:song_artist/:album_title/:song_title', cors(), async function(req, res, next) {
+router.get('/:userID/:releaseID/:song_artist/:album_title/:song_title', cors(), async function(req, res,  next) {
   
     /* use the artist field and title field
     */
@@ -49,7 +49,7 @@ router.get('/:userID/:releaseID/:song_artist/:album_title/:song_title', cors(), 
           Mix: Mix,
           });
           let trck = await newTrack.save();
-          console.log("New Track Added", trck);       
+          console.log("New Track Added ID :", trck._id);       
 
         //Track.save(discogsTr)
         //let track = await discogsTr.save();
