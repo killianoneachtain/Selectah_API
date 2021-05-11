@@ -8,7 +8,6 @@ const mongoUtil = require('../utilities/mongo');
 
 var router = express.Router();
 var Discogs = require('disconnect').Client;
-
 var db = new Discogs().database();
 
 /* GET Check a Username exists on Discogs */

@@ -4,6 +4,7 @@ const cors = require('cors');
 const fs = require('fs');
 const SpotifyWebApi = require('spotify-web-api-node');
 const Track = require('../models/track');
+const mongoUtil = require('../utilities/mongo');
 
 var discogsTr = new Track;
 var spotifyTr = new Track;
@@ -85,15 +86,17 @@ router.get('/:releaseID/:song_artist/:album_title/:song_title', cors(), function
 
         //console.log("Artist : ",Artist,"Album Name : ",albumTitle, "Title : ",Track, "Mix :",Mix);  
         
-        discogsTr = ({    
+        const newTrack = new Track({    
           releaseID: req.params.releaseID,      
           artist: Artist,
           album: albumTitle,
           trackName: Track,
           Mix: Mix,
         });
+        
+        const release = newTrack.save();
 
-        //console.log("Discogs Track", discogsTr);
+        console.log("Discogs Track : ", discogsTr);
 
         //write to mongoTrack db here, so that
         // you can return the object id to the app
@@ -106,6 +109,7 @@ router.get('/:releaseID/:song_artist/:album_title/:song_title', cors(), function
           });
           
           var token="";
+          
     
           // Retrieve an access token
           spotifyApi.clientCredentialsGrant().then(
