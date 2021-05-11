@@ -5,7 +5,6 @@ require('dotenv').config();
 
 var mongo = require('./utilities/mongo');
 
-
 mongo.connectToServer( function( err, client ) {
   if (err) console.log(err);
   // start the rest of your app here

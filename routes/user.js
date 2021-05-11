@@ -3,64 +3,55 @@ const cors = require('cors');
 const fs = require('fs');
 const Release = require('../models/release')
 const mongoUtil = require('../utilities/mongo');
+require('dotenv').config();
 
 //var selectah_db = app.mongo.getDb();
 
 var router = express.Router();
 var Discogs = require('disconnect').Client;
-
 var db = new Discogs().database();
 
 /* GET Check a Username exists on Discogs */
 router.get('/check/:name', cors(), function(req,res, next) {
-  var col = new Discogs({userToken: 'lYVtKyeISQGrTaFWvhONqkFfvbexIAIsrNiJhvAf'}).user();
+  var col = new Discogs({userToken: process.env.Discogs_App_Token}).user();
   
-  console.log("The name to check is ", req.params.name)
-
+  //console.log("The name to check is ", req.params.name)
   col.getProfile(req.params.name, function(err,data) {
     res.json(data);
   } )
 })
 
-/* GET users listing. */
-router.get('/', cors(), function(req, res, next) {
-  res.render('user', { title: 'USER : Killian' });
-});
+/* GET users pagination details. */
+router.get('/pagination/:userName/', cors(), function(req, res, next) {  
+  var col = new Discogs({userToken: process.env.Discogs_App_Token}).user().collection();
 
-router.get('/pages', cors(), function(req, res, next) {  
-  var col = new Discogs({userToken: 'lYVtKyeISQGrTaFWvhONqkFfvbexIAIsrNiJhvAf'}).user().collection();
-
-  col.getReleases('konsouloz', 0, {per_page:50, sort:"added"},
+  col.getReleases(req.params.userName, 0, {per_page:50, sort:"added"},
   function(err, data){
       //Pages =data.pagination;
-      //console.log("Pages" , Pages);           
+      //console.log("Pages for : ", req.params.userName);           
       res.json(data.pagination);         
   });  
 });
 
-router.get('/collection', cors(), function(req, res, next) {  
-    var col = new Discogs({userToken: 'lYVtKyeISQGrTaFWvhONqkFfvbexIAIsrNiJhvAf'}).user().collection();
-  
-    col.getReleases('konsouloz', 0, {per_page:50, sort:"added"},
-    function(err, data){  
-        res.json(data);         
-    });  
-});
 
+/* GET users collection by page number  */
 router.get('/:userName/collection/:pageNumber', cors(), function(req, res, next) {  
-  var col = new Discogs({userToken: 'lYVtKyeISQGrTaFWvhONqkFfvbexIAIsrNiJhvAf'}).user().collection();
+  var col = new Discogs({userToken: process.env.Discogs_App_Token}).user().collection();
 
-  console.log(`Page number : ${req.params.pageNumber}`)
+  //console.log(`Page number : ${req.params.pageNumber}`)
   col.getReleases(req.params.userName, 0, {per_page:50, sort:"added", page:req.params.pageNumber},
   function(err, data){  
       res.json(data);         
   });  
 });
 
-/* GET releases track listing. */ 
+/* GET releases track listing by Discogs Release id.
+ * If the Discogs Release ID is found in the Selecta: Releases
+ * database, then the Atlas record is returned to the app.
+*/ 
    router.get('/release/:releaseId', cors(), function(req, res, next) 
    {
-    var dis = new Discogs('MyUserAgent/1.0', {userToken: 'lYVtKyeISQGrTaFWvhONqkFfvbexIAIsrNiJhvAf'});
+    var dis = new Discogs('MyUserAgent/1.0', {userToken: process.env.Discogs_App_Token});
 
     //console.log("The release ID is : ",req.params.releaseId);
     var releaseData = [];
@@ -71,7 +62,9 @@ router.get('/:userName/collection/:pageNumber', cors(), function(req, res, next)
           //console.log('Release Data is : ', releaseData);
           data = await Release.findByDiscogsID(releaseData.id);
           //console.log("data is ",data);
-          if(data == null){
+
+          if(data == null)
+          {
             data = releaseData;
             console.log("data is", data);
 
@@ -106,7 +99,7 @@ router.get('/genres', cors(), function(req, res, next) {
         ]
       }
     ];  
-    res.json(genres[0]);    
+    res.json(genres.genres);    
   });  
 
 
