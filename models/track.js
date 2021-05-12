@@ -6,13 +6,17 @@ var TrackSchema = new mongoose.Schema({
     artist: {type: String},
     album: {type: String},
     trackName: {type: String},
-    Mix: {type: String}
-
+    mix: {type: String},
+    spotifyID: {tpye: String}
   });
 
   TrackSchema.statics.findByDiscogsID = function(releaseID) {
     return this.findOne({ releaseID : releaseID});
   };
+
+  TrackSchema.statics.findBySpotifyID = function(spotifyID) {
+    return this.findOne({ spotifyID : spotifyID});
+  }
   
   TrackSchema.statics.findByID = function(id) {
     return this.findOne({ _id : id});

@@ -12,6 +12,15 @@ router.get('/:userID/:releaseID/:song_artist/:album_title/:song_title', cors(), 
   
     /* use the artist field and title field
     */
+
+        let deleteAllFirst =  await Track.deleteByUserID(req.params.userID)
+        console.log("Delete all user tracks before start",deleteAllFirst)
+
+        if(deleteAllFirst.ok !== 1)
+        { 
+          return res.json({"Error" : "Failed to Delete previous track searches"})
+        } 
+
         const albumTitle = req.params.album_title;
         const releaseID = req.params.releaseID;
         const userID = req.params.userID;
@@ -46,7 +55,7 @@ router.get('/:userID/:releaseID/:song_artist/:album_title/:song_title', cors(), 
           artist: Artist,
           album: albumTitle,
           trackName: TrackName,
-          Mix: Mix,
+          mix: Mix,
           });
           let trck = await newTrack.save();
           console.log("New Track Added ID :", trck._id);       
@@ -84,7 +93,7 @@ router.get('/:userID/:releaseID/:song_artist/:album_title/:song_title', cors(), 
                 {
                   console.log('Something went wrong in the mainFlow:', err.message);
                 });  
-             
+            
             },
             function(err) {
               console.log(
@@ -96,6 +105,7 @@ router.get('/:userID/:releaseID/:song_artist/:album_title/:song_title', cors(), 
 
     router.get('/:userID/deleteTracks', cors(), async function(req, res, next) {
         let response = await Track.deleteByUserID(req.params.userID)
+        res.json(response)
     });
   
 

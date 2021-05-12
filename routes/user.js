@@ -72,6 +72,11 @@ router.get('/:userName/collection/:pageNumber', cors(), function(req, res, next)
             data = releaseData;
             console.log("data is", data);
 
+
+           /* data.tracklist.forEach(function(track) {
+              var BPMArray = [{ user : "", BPM: 0 }] 
+              this.track.push(BPMArray)}) */
+
             const newRelease = new Release({
               Discogs_id: data.id,
               artists: data.artists,
