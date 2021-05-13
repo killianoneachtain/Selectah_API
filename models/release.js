@@ -12,6 +12,7 @@ const ReleaseSchema = new mongoose.Schema({
     styles: Array,
     tracklist: Array
   });
+  //[{ type: mongoose.Schema.Types.ObjectId, ref: 'TracklistEntry' }]
 
 ReleaseSchema.statics.findByDiscogsID = function(Discogs_id) {
   return this.findOne({ Discogs_id : Discogs_id});
