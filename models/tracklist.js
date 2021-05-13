@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+
 /**
  
 
@@ -17,7 +18,7 @@ const TracklistSchema = new mongoose.Schema({
     title: {type: String},
     artists: {type: Array},
     duration: {type: String},    
-    BPM: {type: Array}
+    BPM: [{ type: mongoose.Schema.Types.ObjectId, ref: 'TrackAnalysis' }]
   });
 
 TracklistSchema.statics.findByPosition = function(position) {
@@ -27,6 +28,7 @@ TracklistSchema.statics.findByPosition = function(position) {
 TracklistSchema.statics.findByID = function(id) {
   return this.findOne({ _id : id});
 };
+
 
 TracklistSchema.statics.findByType = function(type) {
   return this.findOne({ type_ : type});
@@ -38,4 +40,4 @@ TracklistSchema.statics.save = function()
 }
 
 
-module.exports = mongoose.model('Tracklist', TracklistSchema);
+module.exports = mongoose.model('TracklistEntry', TracklistSchema);

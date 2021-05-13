@@ -2,6 +2,8 @@ var express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const Release = require('../models/release')
+const Tracklist = require('../models/tracklist')
+const TrackAnalysis = require('../models/trackAnalysis')
 const mongoUtil = require('../utilities/mongo');
 require('dotenv').config();
 
@@ -9,6 +11,7 @@ require('dotenv').config();
 
 var router = express.Router();
 var Discogs = require('disconnect').Client;
+const { title } = require('process');
 var db = new Discogs().database();
 
 /* GET Check a Username exists on Discogs */
@@ -45,23 +48,30 @@ router.get('/:userName/collection/:pageNumber', cors(), function(req, res, next)
   });  
 });
 
+router.get('/release/trackAnalysis/:releaseID', cors(), async function(req, res) {  
+  console.log(`Release ID for TrackAnaylsis : ${req.params.releaseID}`)
+ 
+  let data = await TrackAnalysis.findByRelease(req.params.releaseID)   
+  //console.log("TRACK ANALYSIS DATA:", data)
+  res.json(data)         
+ 
+});
+
 /* GET releases track listing by Discogs Release id.
  * If the Discogs Release ID is found in the Selecta: Releases
  * database, then the Atlas record is returned to the app.
 */ 
-   router.get('/release/:releaseId', cors(), async function(req, res, next) 
+   router.get('/release/:releaseID', cors(), async function(req, res, next) 
    {
-    var dis = new Discogs('MyUserAgent/1.0', {userToken: process.env.Discogs_App_Token});
-
-    //console.log("The release ID is : ",req.params.releaseId);
+    //var dis = new Discogs('MyUserAgent/1.0', {userToken: process.env.Discogs_App_Token});
     var releaseData = [];
 
-    data = await Release.findByDiscogsID(req.params.releaseId);
+    data = await Release.findByDiscogsID(req.params.releaseID);
     console.log("data for initial check", data)
     
     if(data === null)
       {
-          db.getRelease(req.params.releaseId, async function(err, data){ 
+          db.getRelease(req.params.releaseID, async function(err, data){ 
           releaseData = await data;
           //console.log('Release Data is : ', releaseData);
           data = await Release.findByDiscogsID(releaseData.id);
@@ -70,12 +80,48 @@ router.get('/:userName/collection/:pageNumber', cors(), function(req, res, next)
             {
           
             data = releaseData;
-            console.log("data is", data);
+            //console.log("data is", data);
 
 
-           /* data.tracklist.forEach(function(track) {
-              var BPMArray = [{ user : "", BPM: 0 }] 
-              this.track.push(BPMArray)}) */
+            /*var tracklistArray = []
+
+            data.tracklist.forEach(async function(track) {
+              //create a tracklist object here..
+              const newTracklist = new Tracklist({
+                position: track.position,
+                type_: track.type_,
+                title: track.title,
+                artists: track.artists,
+                duration: track.duration                 
+              });
+                let tracks = await newTracklist.save();
+                console.log("New Tracklist added for ", data.id, " : ", tracks);
+                tracklistArray.push(tracks._id.toString())              
+            }) */
+
+            // create a bpm table with release id, and an object for each track... this will
+            // match up with the presentatino...
+            // it will be a seperate json, but will match the track list data...
+
+             //var audioAnalysisArray = []
+
+            data.tracklist.forEach(async function(track) {
+              //create a tracklist object here..
+              const newTrackAnalysis = new TrackAnalysis({
+                releaseID: req.params.releaseID, 
+                position: track.position,
+                title: track.title,
+                user: [],
+                BPM: 0,
+                BPMConfidence: 1,
+                Key: "D",
+                KeyConfidence: 1,
+                Date: Date.now()
+              });
+                let tracks = await newTrackAnalysis.save();
+                console.log("New Audio analysis added for ", data.id, " : ", tracks);
+                //tracklistArray.push(tracks._id.toString())              
+            }) 
 
             const newRelease = new Release({
               Discogs_id: data.id,
@@ -86,7 +132,7 @@ router.get('/:userName/collection/:pageNumber', cors(), function(req, res, next)
               title: data.title,
               genres: data.genres,
               styles: data.styles,
-              tracklist: data.tracklist
+              tracklist: data.tracklist//tracklistArray
             });
               let release = await newRelease.save();
               console.log("New Release Added", release);
