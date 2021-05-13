@@ -16,8 +16,7 @@ var db = new Discogs().database();
 
 /* GET Check a Username exists on Discogs */
 router.get('/check/:name', cors(), function(req,res, next) {
-  var col = new Discogs({userToken: process.env.Discogs_App_Token}).user();
-  
+  var col = new Discogs({userToken: process.env.Discogs_App_Token}).user();  
   //console.log("The name to check is ", req.params.name)
   col.getProfile(req.params.name, function(err,data) {
     res.json(data);
@@ -29,9 +28,7 @@ router.get('/pagination/:userName/', cors(), function(req, res, next) {
   var col = new Discogs({userToken: process.env.Discogs_App_Token}).user().collection();
 
   col.getReleases(req.params.userName, 0, {per_page:50, sort:"added"},
-  function(err, data){
-      //Pages =data.pagination;
-      //console.log("Pages for : ", req.params.userName);           
+  function(err, data){               
       res.json(data.pagination);         
   });  
 });
@@ -40,8 +37,7 @@ router.get('/pagination/:userName/', cors(), function(req, res, next) {
 /* GET users collection by page number  */
 router.get('/:userName/collection/:pageNumber', cors(), function(req, res, next) {  
   var col = new Discogs({userToken: process.env.Discogs_App_Token}).user().collection();
-
-  //console.log(`Page number : ${req.params.pageNumber}`)
+  
   col.getReleases(req.params.userName, 0, {per_page:50, sort:"added", page:req.params.pageNumber},
   function(err, data){  
       res.json(data);         
@@ -51,8 +47,7 @@ router.get('/:userName/collection/:pageNumber', cors(), function(req, res, next)
 router.get('/release/trackAnalysis/:releaseID', cors(), async function(req, res) {  
   console.log(`Release ID for TrackAnaylsis : ${req.params.releaseID}`)
  
-  let data = await TrackAnalysis.findByRelease(req.params.releaseID)   
-  //console.log("TRACK ANALYSIS DATA:", data)
+  let data = await TrackAnalysis.findByRelease(req.params.releaseID)
   res.json(data)         
  
 });
@@ -67,7 +62,7 @@ router.get('/release/trackAnalysis/:releaseID', cors(), async function(req, res)
     var releaseData = [];
 
     data = await Release.findByDiscogsID(req.params.releaseID);
-    console.log("data for initial check", data)
+    //console.log("data for initial check", data)
     
     if(data === null)
       {

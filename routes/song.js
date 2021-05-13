@@ -7,15 +7,17 @@ const Track = require('../models/track');
 require('dotenv').config();
 const matching = require('../utilities/matching')
 const Release = require('../models/release')
+const TrackAnalysis = require('../models/trackAnalysis')
 
 /* GET Track Audio Analysis */
-router.get('/:userID/:artistName/:albumTitle/:trackTitle/:trackID', cors(), async function (req, res,next) {
+router.get('/:userID/:artistName/:albumTitle/:trackTitle/:trackID/:analysisID', cors(), async function (req, res,next) {
   
   console.log("UserID : ", req.params.userID)
   console.log("Artist  :", req.params.artistName)
   console.log("Album Title :", req.params.albumTitle)
   console.log("Track title :", req.params.trackTitle)
   console.log("Track id :", req.params.trackID)
+  console.log("Analysis ID :", req.params.analysisID)
 
   let TrackName = req.params.trackTitle;
   let Mix = "";
@@ -37,8 +39,8 @@ router.get('/:userID/:artistName/:albumTitle/:trackTitle/:trackID', cors(), asyn
       //console.log('The access token expires in ' + data.body['expires_in']);
       //console.log('The access token is ' + data.body['access_token']);          
       // Save the access token so that it's used in future calls
-      spotifyApi.setAccessToken(data.body['access_token']);
-      spotifyApi.getAudioAnalysisForTrack(`${req.params.trackID}`).then(
+      await spotifyApi.setAccessToken(data.body['access_token']);
+      await spotifyApi.getAudioAnalysisForTrack(`${req.params.trackID}`).then(
         async function(data) 
         {
             //console.log(data.body.track);
@@ -56,47 +58,28 @@ router.get('/:userID/:artistName/:albumTitle/:trackTitle/:trackID', cors(), asyn
               spotifyID: req.params.trackID
               });
               let trck = await newTrack.save();
-              console.log("track saved : ", trck);
+              //console.log("track saved : ", trck);
 
               // search the DB for the two tracsk
               let tracks = await Track.findByUserID(req.params.userID)
 
               let m1 = new matching(tracks, 0)
-              console.log("m1 : ", m1)
+              //console.log("m1 : ", m1)
 
               if(m1.matchCount == 4)
               { 
                 console.log("We have a Match")
-                var relID = ""
-                if(tracks != null)
-                {
-                  tracks.forEach(function(rID) {
-                    var release_id = rID.releaseID
-                    if(release_id != null){
-                      relID = release_id
-                    }
-                  })
+                //we need to find the track in the analyses table
+                trackData = await TrackAnalysis.findById(req.params.analysisID)
+                console.log("Track to Add BPM to : ", trackData)
 
-                console.log("Release ID : ", relID)
+                const BPMUpdate = { BPM: Number((data.body.track.tempo).toFixed(0)) }
+                await trackData.updateOne(BPMUpdate)
+                await trackData.save()
 
-                var thisRelease = await Release.findByDiscogsID(relID)
-                console.log("Release : ", thisRelease)
-
-                var tracklisting = thisRelease.tracklist;
-                if(tracklisting != null)
-                { 
-                  tracklisting.forEach(function(track) {
-                    var track_title = track.title                    
-                    if(track_title === TrackName)
-                    { 
-                      console.log("The type of track is : ", typeof track)                     
-
-                    }
-
-                  })
-                }
-
-                }
+                const userUpdate = { users : ["***ALL***"] }
+                await trackData.updateOne(userUpdate)
+                await trackData.save()                
 
               }
               
