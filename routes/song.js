@@ -35,11 +35,10 @@ router.get('/:userID/:artistName/:albumTitle/:trackTitle/:trackID/:analysisID', 
   var token="";
   // Retrieve an access token
   spotifyApi.clientCredentialsGrant().then(
-    async function(data) {
-      //console.log('The access token expires in ' + data.body['expires_in']);
-      //console.log('The access token is ' + data.body['access_token']);          
+    async function(data) {          
       // Save the access token so that it's used in future calls
       await spotifyApi.setAccessToken(data.body['access_token']);
+
       await spotifyApi.getAudioAnalysisForTrack(`${req.params.trackID}`).then(
         async function(data) 
         {
@@ -80,15 +79,36 @@ router.get('/:userID/:artistName/:albumTitle/:trackTitle/:trackID/:analysisID', 
 
                 const userUpdate = { users : ["***ALL***"] }
                 await trackData.updateOne(userUpdate)
-                await trackData.save()                
+                let rSave = await trackData.save()
+                console.log("Succesful write to Analytics : ",rSave)
+
+                res.json({ Success : true })
 
               }
-              
-            //create
+              else 
+              {
+                console.log(`Only ${m1.matchCount} Matched`)
+
+                trackData = await TrackAnalysis.findById(req.params.analysisID)
+                console.log("Track to Add BPM to : ", trackData)
+
+                const BPMUpdate = { BPM: Number((data.body.track.tempo).toFixed(0)) }
+                await trackData.updateOne(BPMUpdate)
+                await trackData.save()
+
+                let existingUsers = trackData.users
+                existingUsers.push(req.params.userID)
+                await trackData.updateOne({ users : existingUsers})
+                let rSave = await trackData.save()
+                console.log("Succesful write to Analytics : ",rSave)
+
+                res.json({ Success : true })
+              }
             
         })
        }).catch(function(err) {
           console.log('Something went wrong in GET Audio Analysis', err.message);
+          res.json({ Success : false, Message : err.message })
           });  
        
       },
@@ -97,6 +117,7 @@ router.get('/:userID/:artistName/:albumTitle/:trackTitle/:trackID/:analysisID', 
           'Something went wrong when retrieving an access token in the function gettingAudioAnalysis()',
           err.message
         );
+        
       }
     );      
 

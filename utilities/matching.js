@@ -59,7 +59,7 @@ module.exports = function (tracks, matchcount ) {
     }
     console.log("Songs : ", songsMatch)
 
-    if(mixes[0] === mixes[1])
+    if(mixes[0].replace("Discogs","").replace("Spotify","") === mixes[1].replace("Discogs","").replace("Spotify",""))
     { 
         this.matchCount = this.matchCount + 1 
         mixesMatch = true
@@ -77,7 +77,6 @@ module.exports = function (tracks, matchcount ) {
             if((artistsMatch === true) && (songsMatch === true))
             {
                 console.log("Mixes are : ", mixes)
-
                 
             }
             break;
