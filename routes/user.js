@@ -67,55 +67,31 @@ router.get('/release/trackAnalysis/:releaseID', cors(), async function(req, res)
     if(data === null)
       {
           db.getRelease(req.params.releaseID, async function(err, data){ 
-          releaseData = await data;
-          //console.log('Release Data is : ', releaseData);
-          data = await Release.findByDiscogsID(releaseData.id);
-          //console.log("data is ",data); 
+          releaseData = await data
+          
+          data = await Release.findByDiscogsID(releaseData.id)          
+
           if(data == null)
             {
           
-            data = releaseData;
-            //console.log("data is", data);
+              data = releaseData;
+              //console.log("data is", data);
+              data.tracklist.forEach(async function(track) {
+                
+                const newTrackAnalysis = new TrackAnalysis({
+                  releaseID: req.params.releaseID, 
+                  position: track.position,
+                  title: track.title,
+                  user: [],
+                  BPM: 0,
+                  BPMConfidence: 1,
+                  Key: "D",
+                  KeyConfidence: 1,
+                  Date: Date.now()
+                });
 
-
-            /*var tracklistArray = []
-
-            data.tracklist.forEach(async function(track) {
-              //create a tracklist object here..
-              const newTracklist = new Tracklist({
-                position: track.position,
-                type_: track.type_,
-                title: track.title,
-                artists: track.artists,
-                duration: track.duration                 
-              });
-                let tracks = await newTracklist.save();
-                console.log("New Tracklist added for ", data.id, " : ", tracks);
-                tracklistArray.push(tracks._id.toString())              
-            }) */
-
-            // create a bpm table with release id, and an object for each track... this will
-            // match up with the presentatino...
-            // it will be a seperate json, but will match the track list data...
-
-             //var audioAnalysisArray = []
-
-            data.tracklist.forEach(async function(track) {
-              //create a tracklist object here..
-              const newTrackAnalysis = new TrackAnalysis({
-                releaseID: req.params.releaseID, 
-                position: track.position,
-                title: track.title,
-                user: [],
-                BPM: 0,
-                BPMConfidence: 1,
-                Key: "D",
-                KeyConfidence: 1,
-                Date: Date.now()
-              });
-                let tracks = await newTrackAnalysis.save();
-                console.log("New Audio analysis added for ", data.id, " : ", tracks);
-                //tracklistArray.push(tracks._id.toString())              
+                let tracks = await newTrackAnalysis.save()
+                console.log("New Audio analysis added for ", data.id, " : ", tracks)                              
             }) 
 
             const newRelease = new Release({

@@ -55,6 +55,7 @@ router.get('/:userID/:artistName/:albumTitle/:trackTitle/:trackID/:analysisID', 
               album: req.params.albumTitle,
               trackName: TrackName,
               mix: Mix,
+              source: "Spotify",
               spotifyID: req.params.trackID
               });
               let trck = await newTrack.save();
@@ -63,7 +64,7 @@ router.get('/:userID/:artistName/:albumTitle/:trackTitle/:trackID/:analysisID', 
               // search the DB for the two tracsk
               let tracks = await Track.findByUserID(req.params.userID)
 
-              let m1 = new matching(tracks, 0)
+              let m1 = await new matching(tracks, 0)
               //console.log("m1 : ", m1)
 
               if(m1.matchCount == 4)

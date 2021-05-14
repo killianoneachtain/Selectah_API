@@ -55,6 +55,7 @@ router.get('/:userID/:releaseID/:song_artist/:album_title/:song_title', cors(), 
           artist: Artist,
           album: albumTitle,
           trackName: TrackName,
+          source: "Discogs",
           mix: Mix,
           });
           let trck = await newTrack.save();
