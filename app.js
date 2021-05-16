@@ -5,7 +5,6 @@ require('dotenv').config();
 
 var mongo = require('./utilities/mongo');
 
-
 mongo.connectToServer( function( err, client ) {
   if (err) console.log(err);
   // start the rest of your app here
@@ -19,6 +18,8 @@ var indexRouter = require('./routes/index');
 var authorizeRouter = require('./routes/authorize');
 var userRouter = require('./routes/user');
 var songRouter = require('./routes/song');
+var auth0Router = require('./routes/auth0');
+var searchRouter = require('./routes/songSearch');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -35,6 +36,9 @@ app.use('/', indexRouter);
 app.use('/authorize',authorizeRouter);
 app.use('/user',userRouter);
 app.use('/song',songRouter);
+app.use('/auth0',auth0Router);
+app.use('/songSearch',searchRouter);
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

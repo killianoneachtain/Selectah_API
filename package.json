@@ -6,22 +6,23 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "auth0": "^2.34.2",
     "body-parser": "^1.19.0",
     "constantinople": "^4.0.1",
     "cookie-parser": "~1.4.5",
     "cors": "^2.8.5",
     "debug": "^4.3.1",
     "disconnect": "^1.2.2",
-    "dotenv": "^8.2.0",
+    "dotenv": "^8.6.0",
     "env": "0.0.2",
     "express": "^4.17.1",
     "http-errors": "^1.8.0",
     "jstransformer": "^1.0.0",
     "merge-json-file": "^1.0.1",
-    "mongoose": "^5.12.5",
+    "mongoose": "^5.12.8",
     "morgan": "^1.10.0",
     "pug": "^3.0.2",
     "spotify-web-api-node": "^5.0.2",
-    "uglify-js": "^3.13.4"
+    "uglify-js": "^3.13.6"
   }
 }

@@ -2,82 +2,122 @@ var express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const Release = require('../models/release')
+const Tracklist = require('../models/tracklist')
+const TrackAnalysis = require('../models/trackAnalysis')
 const mongoUtil = require('../utilities/mongo');
+require('dotenv').config();
 
 //var selectah_db = app.mongo.getDb();
 
 var router = express.Router();
 var Discogs = require('disconnect').Client;
+const { title } = require('process');
 var db = new Discogs().database();
 
+/* GET Check a Username exists on Discogs */
+router.get('/check/:name', cors(), function(req,res, next) {
+  var col = new Discogs({userToken: process.env.Discogs_App_Token}).user();  
+  //console.log("The name to check is ", req.params.name)
+  col.getProfile(req.params.name, function(err,data) {
+    res.json(data);
+  } )
+})
 
-/* GET users listing. */
-router.get('/', cors(), function(req, res, next) {
-  res.render('user', { title: 'USER : Killian' });
-});
+/* GET users pagination details. */
+router.get('/pagination/:userName/:perPage/:orderBy', cors(), function(req, res, next) {  
+  var col = new Discogs({userToken: process.env.Discogs_App_Token}).user().collection();
 
-router.get('/pages', cors(), function(req, res, next) {  
-  var col = new Discogs({userToken: 'lYVtKyeISQGrTaFWvhONqkFfvbexIAIsrNiJhvAf'}).user().collection();
-
-  col.getReleases('konsouloz', 0, {per_page:50, sort:"added"},
-  function(err, data){
-      //Pages =data.pagination;
-      //console.log("Pages" , Pages);           
+  col.getReleases(req.params.userName, 0, {per_page: req.params.perPage, sort:req.params.orderBy},
+  function(err, data){               
       res.json(data.pagination);         
   });  
 });
 
-router.get('/collection', cors(), function(req, res, next) {  
-    var col = new Discogs({userToken: 'lYVtKyeISQGrTaFWvhONqkFfvbexIAIsrNiJhvAf'}).user().collection();
+
+/* GET users collection by page number  */
+router.get('/:userName/collection/:orderBy/:perPage/:pageNumber', cors(), function(req, res, next) {  
+  var col = new Discogs({userToken: process.env.Discogs_App_Token}).user().collection();
   
-    col.getReleases('konsouloz', 0, {per_page:50, sort:"added"},
-    function(err, data){  
-        res.json(data);         
-    });  
-});
-
-router.get('/collection/:pageNumber', cors(), function(req, res, next) {  
-  var col = new Discogs({userToken: 'lYVtKyeISQGrTaFWvhONqkFfvbexIAIsrNiJhvAf'}).user().collection();
-
-  console.log(`Page number : ${req.params.pageNumber}`)
-  col.getReleases('konsouloz', 0, {per_page:50, sort:"added", page:req.params.pageNumber},
+  col.getReleases(req.params.userName, 0, {per_page:req.params.perPage, sort: req.params.orderBy, page:req.params.pageNumber},
   function(err, data){  
       res.json(data);         
   });  
 });
 
-/* GET releases track listing. */ 
-   router.get('/release/:releaseId', cors(), function(req, res, next) 
-   {
-    var dis = new Discogs('MyUserAgent/1.0', {userToken: 'lYVtKyeISQGrTaFWvhONqkFfvbexIAIsrNiJhvAf'});
+router.get('/release/trackAnalysis/:releaseID', cors(), async function(req, res) {  
+  console.log(`Release ID for TrackAnaylsis : ${req.params.releaseID}`)
+ 
+  var data = await TrackAnalysis.findByRelease(req.params.releaseID)
+  res.json(data)         
+ 
+});
 
-    console.log("The release ID is : ",req.params.releaseId);
+/* GET releases track listing by Discogs Release id.
+ * If the Discogs Release ID is found in the Selecta: Releases
+ * database, then the Atlas record is returned to the app.
+*/ 
+   router.get('/release/:releaseID', cors(), async function(req, res, next) 
+   {
+    //var dis = new Discogs('MyUserAgent/1.0', {userToken: process.env.Discogs_App_Token});
     var releaseData = [];
 
-      db.getRelease(req.params.releaseId, async function(err, data){ 
-          releaseData = await data;
-          console.log('Release Data is : ', releaseData.id);
-
-
-          data = await Release.findByDiscogsID(releaseData.id);
-          
-          //          var checker = db.collection( 'users' ).find();
-         
-
-          //check if the release id is in the mongo db
-          // if it is return that one
-          // if not then create an entry for the release.
-
-
-          res.json(data);
-          
-    });     
+    data = await Release.findByDiscogsID(req.params.releaseID);
+    //console.log("data for initial check", data)
     
+    if(data === null)
+      {
+          db.getRelease(req.params.releaseID, async function(err, data){ 
+          releaseData = await data
+          
+          data = await Release.findByDiscogsID(releaseData.id)          
+
+          if(data == null)
+            {
+          
+              data = releaseData;
+              //console.log("data is", data);
+              data.tracklist.forEach(async function(track) {
+                
+                const newTrackAnalysis = new TrackAnalysis({
+                  releaseID: req.params.releaseID, 
+                  position: track.position,
+                  title: track.title,
+                  user: [],
+                  BPM: 0,
+                  BPMConfidence: 1,
+                  Key: "D",
+                  KeyConfidence: 1,
+                  Date: Date.now()
+                });
+
+                var tracks = await newTrackAnalysis.save()
+                console.log("New Audio analysis added for ", data.id, " : ", tracks)                              
+            }) 
+
+            const newRelease = new Release({
+              Discogs_id: data.id,
+              artists: data.artists,
+              artists_sort: data.artists_sort,
+              date_changed: data.date_changed,
+              master_id: data.master_id,
+              title: data.title,
+              genres: data.genres,
+              styles: data.styles,
+              tracklist: data.tracklist//tracklistArray
+            });
+              var release = await newRelease.save();
+              console.log("New Release Added", release);
+            }
+            res.json(data);          
+          });  
+      }
+      else 
+      { 
+        res.json(data);
+      }       
   });
 
-
-
-router.get('/genres/', cors(), function(req, res, next) {
+router.get('/genres', cors(), function(req, res, next) {
     var genres = [ {"genres": [      
       { id: 1, name:"Electronic" },
       { id: 2, name:"Hip Hop" },
@@ -90,7 +130,7 @@ router.get('/genres/', cors(), function(req, res, next) {
         ]
       }
     ];  
-    res.json(genres[0]);    
+    res.json(genres.genres);    
   });  
 
 
