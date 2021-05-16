@@ -38,7 +38,8 @@ router.get('/:userID/:releaseID/:song_artist/:album_title/:song_title', cors(), 
           Artist = temp.trim();
         }
 
-        let TrackName = req.params.song_title;
+        let TrackName = req.params.song_title.replace("'","");
+        console.log("track name",TrackName)       
         let Mix = "";
         if(TrackName.includes("("))
         {
@@ -74,14 +75,17 @@ router.get('/:userID/:releaseID/:song_artist/:album_title/:song_title', cors(), 
     
           // Retrieve an access token
           spotifyApi.clientCredentialsGrant().then(
-            function(data) {
+           async function(data) {
               //console.log('The access token expires in ' + data.body['expires_in']);
               //console.log('The access token is ' + data.body['access_token']);          
               // Save the access token so that it's used in future calls
-              spotifyApi.setAccessToken(data.body['access_token']);
+
+              console.log("sending : ", Artist, TrackName)
+
+              await spotifyApi.setAccessToken(data.body['access_token']);
                           
                 // Use the access token to retrieve information about the user connected to it
-                return spotifyApi.searchTracks(`artist:${Artist} track:${TrackName}`,  { limit : 50 });
+                return await spotifyApi.searchTracks(`${Artist} ${TrackName}`,  { limit : 50 });
                 })
                 .then(function(data) 
                 {
