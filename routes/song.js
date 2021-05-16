@@ -19,11 +19,11 @@ router.get('/:userID/:artistName/:albumTitle/:trackTitle/:trackID/:analysisID', 
   console.log("Track id :", req.params.trackID)
   console.log("Analysis ID :", req.params.analysisID)
 
-  let TrackName = req.params.trackTitle;
-  let Mix = "";
+  var TrackName = req.params.trackTitle;
+  var Mix = "";
   if(TrackName.includes("("))
   {
-    let temp = TrackName.split('(')[0].trim();
+    var temp = TrackName.split('(')[0].trim();
     Mix = TrackName.split('(')[1].split(')')[0].trim();
     TrackName = temp.trim();
   }
@@ -35,11 +35,10 @@ router.get('/:userID/:artistName/:albumTitle/:trackTitle/:trackID/:analysisID', 
   var token="";
   // Retrieve an access token
   spotifyApi.clientCredentialsGrant().then(
-    async function(data) {
-      //console.log('The access token expires in ' + data.body['expires_in']);
-      //console.log('The access token is ' + data.body['access_token']);          
+    async function(data) {          
       // Save the access token so that it's used in future calls
       await spotifyApi.setAccessToken(data.body['access_token']);
+
       await spotifyApi.getAudioAnalysisForTrack(`${req.params.trackID}`).then(
         async function(data) 
         {
@@ -55,15 +54,16 @@ router.get('/:userID/:artistName/:albumTitle/:trackTitle/:trackID/:analysisID', 
               album: req.params.albumTitle,
               trackName: TrackName,
               mix: Mix,
+              source: "Spotify",
               spotifyID: req.params.trackID
               });
-              let trck = await newTrack.save();
+              var trck = await newTrack.save();
               //console.log("track saved : ", trck);
 
               // search the DB for the two tracsk
-              let tracks = await Track.findByUserID(req.params.userID)
+              var tracks = await Track.findByUserID(req.params.userID)
 
-              let m1 = new matching(tracks, 0)
+              var m1 = await new matching(tracks, 0)
               //console.log("m1 : ", m1)
 
               if(m1.matchCount == 4)
@@ -79,15 +79,36 @@ router.get('/:userID/:artistName/:albumTitle/:trackTitle/:trackID/:analysisID', 
 
                 const userUpdate = { users : ["***ALL***"] }
                 await trackData.updateOne(userUpdate)
-                await trackData.save()                
+                var rSave = await trackData.save()
+                console.log("Succesful write to Analytics : ",rSave)
+
+                res.json({ Success : true })
 
               }
-              
-            //create
+              else 
+              {
+                console.log(`Only ${m1.matchCount} Matched`)
+
+                trackData = await TrackAnalysis.findById(req.params.analysisID)
+                console.log("Track to Add BPM to : ", trackData)
+
+                const BPMUpdate = { BPM: Number((data.body.track.tempo).toFixed(0)) }
+                await trackData.updateOne(BPMUpdate)
+                await trackData.save()
+
+                var existingUsers = trackData.users
+                existingUsers.push(req.params.userID)
+                await trackData.updateOne({ users : existingUsers})
+                var rSave = await trackData.save()
+                console.log("Succesful write to Analytics : ",rSave)
+
+                res.json({ Success : true })
+              }
             
         })
        }).catch(function(err) {
           console.log('Something went wrong in GET Audio Analysis', err.message);
+          res.json({ Success : false, Message : err.message })
           });  
        
       },
@@ -96,6 +117,7 @@ router.get('/:userID/:artistName/:albumTitle/:trackTitle/:trackID/:analysisID', 
           'Something went wrong when retrieving an access token in the function gettingAudioAnalysis()',
           err.message
         );
+        
       }
     );      
 

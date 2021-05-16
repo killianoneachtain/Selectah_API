@@ -8,12 +8,12 @@ const Track = require('../models/track');
 require('dotenv').config();
 
    /* GET releases track listing. */
-router.get('/:userID/:releaseID/:song_artist/:album_title/:song_title', cors(), async function(req, res,  next) {
+router.get('/:userID/:releaseID/:songArtist/:albumTitle/:songTitle', cors(), async function(req, res,  next) {
   
     /* use the artist field and title field
     */
 
-        let deleteAllFirst =  await Track.deleteByUserID(req.params.userID)
+        var deleteAllFirst =  await Track.deleteByUserID(req.params.userID)
         console.log("Delete all user tracks before start",deleteAllFirst)
 
         if(deleteAllFirst.ok !== 1)
@@ -21,28 +21,29 @@ router.get('/:userID/:releaseID/:song_artist/:album_title/:song_title', cors(), 
           return res.json({"Error" : "Failed to Delete previous track searches"})
         } 
 
-        const albumTitle = req.params.album_title;
-        const releaseID = req.params.releaseID;
-        const userID = req.params.userID;
+        const albumTitle = req.params.albumTitle.trim();
+        const releaseID = req.params.releaseID.trim();
+        const userID = req.params.userID.trim();
 
-        let Artist = req.params.song_artist;
+        var Artist = req.params.songArtist.trim();
         if (Artist.includes('('))
         { 
-          let temp = Artist.split('(')[0].trim();
-          Artist = temp;
+          var temp = Artist.split('(')[0].trim();
+          Artist = temp.trim();
         }
 
         if(Artist.includes('&'))
         { 
-          let temp = Artist.split('&')[0].trim();
+          vartemp = Artist.split('&')[0].trim();
           Artist = temp.trim();
         }
 
-        let TrackName = req.params.song_title;
-        let Mix = "";
+        var TrackName = req.params.songTitle.replace("'","‘").trim();
+        console.log("track name",TrackName)       
+        var Mix = "";
         if(TrackName.includes("("))
         {
-          let temp = TrackName.split('(')[0].trim();
+          var temp = TrackName.split('(')[0].trim();
           Mix = TrackName.split('(')[1].split(')')[0].trim();
           TrackName = temp.trim();
         }
@@ -55,13 +56,14 @@ router.get('/:userID/:releaseID/:song_artist/:album_title/:song_title', cors(), 
           artist: Artist,
           album: albumTitle,
           trackName: TrackName,
+          source: "Discogs",
           mix: Mix,
           });
-          let trck = await newTrack.save();
+          var trck = await newTrack.save();
           console.log("New Track Added ID :", trck._id);       
 
         //Track.save(discogsTr)
-        //let track = await discogsTr.save();
+        //var track = await discogsTr.save();
         //console.log(track);
 
         const spotifyApi = new SpotifyWebApi({
@@ -73,14 +75,17 @@ router.get('/:userID/:releaseID/:song_artist/:album_title/:song_title', cors(), 
     
           // Retrieve an access token
           spotifyApi.clientCredentialsGrant().then(
-            function(data) {
+           async function(data) {
               //console.log('The access token expires in ' + data.body['expires_in']);
               //console.log('The access token is ' + data.body['access_token']);          
               // Save the access token so that it's used in future calls
-              spotifyApi.setAccessToken(data.body['access_token']);
+
+              console.log("sending : ", Artist, TrackName)
+
+              await spotifyApi.setAccessToken(data.body['access_token']);
                           
                 // Use the access token to retrieve information about the user connected to it
-                return spotifyApi.searchTracks(`artist:${Artist} track:${TrackName}`,  { limit : 50 });
+                return await spotifyApi.searchTracks(`artist:${Artist.toLowerCase()} track:${TrackName.toLowerCase()}`,  { limit : 50 });
                 })
                 .then(function(data) 
                 {
@@ -104,7 +109,7 @@ router.get('/:userID/:releaseID/:song_artist/:album_title/:song_title', cors(), 
           );   
 
     router.get('/:userID/deleteTracks', cors(), async function(req, res, next) {
-        let response = await Track.deleteByUserID(req.params.userID)
+        var response = await Track.deleteByUserID(req.params.userID)
         res.json(response)
     });
   

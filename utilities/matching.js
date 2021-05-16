@@ -3,6 +3,10 @@ module.exports = function (tracks, matchcount ) {
     var artists = []
     var albums = []
     var mixes = []
+
+    const versions = ['clean', 'street', 'dirty', 'radio', 'instrumental', 'extended',
+                    '7\"', 'album', 'acapella', 'lp', '12\"', 'long', 'short', 'mini' ,'vocal'
+                    ]
     
     var songsMatch = false
     var artistsMatch=false
@@ -13,19 +17,24 @@ module.exports = function (tracks, matchcount ) {
 
     tracks.forEach(function(song) {
       var songName = song.trackName 
-      songs.push(songName)})
+      songs.push(songName)
+    })
      
     tracks.forEach(function(arts) {
        var artistName = arts.artist 
-        artists.push(artistName)})
+        artists.push(artistName)
+    })
        
     tracks.forEach(function(alb) {
         var albumName = alb.album 
-        albums.push(albumName)})
+        albums.push(albumName)
+    })
         
     tracks.forEach(function(mixer) {
-        var mixName = mixer.mix 
-        mixes.push(mixName)})
+        var mixName = mixer.mix.toLowerCase()
+        var source = mixer.source 
+        mixes.push( `${source} :  ${mixName}`)
+    })
 
     if(artists[0] === artists[1] || artists[0].toLowerCase() === artists[1].toLowerCase()
         || artists[0].replace(" ","").toLowerCase() === artists[1].toLowerCase() 
@@ -50,12 +59,85 @@ module.exports = function (tracks, matchcount ) {
     }
     console.log("Songs : ", songsMatch)
 
-    if(mixes[0] === mixes[1])
+    if(mixes[0].replace("Discogs","").replace("Spotify","") === mixes[1].replace("Discogs","").replace("Spotify",""))
     { 
         this.matchCount = this.matchCount + 1 
         mixesMatch = true
     }
     console.log("mixes : ", mixesMatch)
+
+    switch(this.matchCount)
+    { 
+        case 1: 
+            console.log("Only ONE Matched")
+            break;
+
+        case 2: 
+            console.log("Only TWO Matched")
+            if((artistsMatch === true) && (songsMatch === true))
+            {
+                console.log("Mixes are : ", mixes)
+                
+            }
+            break;
+
+        case 3: 
+            console.log("Only THREE Matched")
+
+            if((artistsMatch === true) && (songsMatch === true) && (mixesMatch === true))
+            { 
+                this.matchCount = 4
+            }
+            
+            if((artistsMatch === true) && (songsMatch === true))
+            {
+                console.log("Mixes are : ", mixes)
+
+                mixes.forEach(function(mix) {
+                    var mixName = mix
+                    if (mixName.includes("Discogs"))
+                    {
+                        var variation = mixName.split(":")[1].trim()
+                        console.log("variation is ", variation)
+
+                        if(variation.includes(" "))
+                        {
+                            var variations = variation.split(" ")
+                            var matches = 0                           
+
+                            variations.forEach(function(variety) {
+                                if(versions.indexOf(variety) > -1) {
+                                    matches++
+                                }
+                            })
+
+                            if(matches == variations.length)
+                            { 
+                                this.matchCount = 4  
+                            }
+                        } else {                            
+                                var variations = [variation]
+                                var matches = 0                           
+    
+                                variations.forEach(function(variety) {
+                                    if(versions.indexOf(variety) > -1) {
+                                        matches++
+                                    }
+                                })    
+                                if(matches == variations.length)
+                                { 
+                                    this.matchCount = 4  
+                                }                            
+                        }
+                    }})
+            }
+
+        break;
+
+        default: 
+        console.log("DEFAULT : Nothing Matched")
+        break;
+    }
 
     if(this.matchCount == 4)
     { 
