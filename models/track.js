@@ -7,6 +7,7 @@ var TrackSchema = new mongoose.Schema({
     album: {type: String},
     trackName: {type: String},
     mix: {type: String},
+    source: {type: String},
     spotifyID: {tpye: String}
   });
 
