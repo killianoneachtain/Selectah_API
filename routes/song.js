@@ -3,114 +3,133 @@ var router = express.Router();
 const cors = require('cors');
 const fs = require('fs');
 const SpotifyWebApi = require('spotify-web-api-node');
+const Track = require('../models/track');
+require('dotenv').config();
+const matching = require('../utilities/matching')
+const Release = require('../models/release')
+const TrackAnalysis = require('../models/trackAnalysis')
 
-   /* GET releases track listing. */
-router.get('/:song_artist/:song_title', cors(), function(req, res, next) {
+/* GET Track Audio Analysis */
+router.get('/:userID/:artistName/:albumTitle/:trackTitle/:trackID/:analysisID', cors(), async function (req, res,next) {
   
-    /* use the artist field and title field
-    */
-        let Artist = req.params.song_artist;
-        if (Artist.includes('('))
-        { 
-          let temp = Artist.split('(')[0].trim();
-          Artist = temp;
-        }
+  console.log("UserID : ", req.params.userID)
+  console.log("Artist  :", req.params.artistName)
+  console.log("Album Title :", req.params.albumTitle)
+  console.log("Track title :", req.params.trackTitle)
+  console.log("Track id :", req.params.trackID)
+  console.log("Analysis ID :", req.params.analysisID)
 
-        if(Artist.includes('&'))
-        { 
-          let temp = Artist.split('&')[0].trim();
-          Artist = temp.trim();
-        }
+  var TrackName = req.params.trackTitle;
+  var Mix = "";
+  if(TrackName.includes("("))
+  {
+    var temp = TrackName.split('(')[0].trim();
+    Mix = TrackName.split('(')[1].split(')')[0].trim();
+    TrackName = temp.trim();
+  }
+  const spotifyApi = new SpotifyWebApi({
+    clientId: process.env.SpotifyClientID,
+    clientSecret: process.env.SpotifyClientSecret
+  });  
 
-        let Track = req.params.song_title;
-        let Mix = "";
-        if(Track.includes("("))
+  var token="";
+  // Retrieve an access token
+  spotifyApi.clientCredentialsGrant().then(
+    async function(data) {          
+      // Save the access token so that it's used in future calls
+      await spotifyApi.setAccessToken(data.body['access_token']);
+
+      await spotifyApi.getAudioAnalysisForTrack(`${req.params.trackID}`).then(
+        async function(data) 
         {
-          let temp = Track.split('(')[0].trim();
-          Mix = Track.split('(')[1].split(')')[0].trim();
-          Track = temp.trim();
-        }
+            //console.log(data.body.track);
+            console.log("BPM IS : ",Number((data.body.track.tempo).toFixed(0)));  
+            console.log("Tempo Confidence IS : ",data.body.track.tempo_confidence);  
+            console.log("Key  IS : ",data.body.track.key);
+            console.log("Key confidence IS : ",data.body.track.key_confidence);   
+ 
+            const newTrack = new Track({
+              userID: req.params.userID,              
+              artist: req.params.artistName,
+              album: req.params.albumTitle,
+              trackName: TrackName,
+              mix: Mix,
+              source: "Spotify",
+              spotifyID: req.params.trackID
+              });
+              var trck = await newTrack.save();
+              //console.log("track saved : ", trck);
 
-        console.log("Artist : ",Artist, "Title : ",Track, "Mix :",Mix);  
-        
+              // search the DB for the two tracsk
+              var tracks = await Track.findByUserID(req.params.userID)
 
-        const spotifyApi = new SpotifyWebApi({
-            clientId: 'fd323724c7db406187a9a00ff6519101',
-            clientSecret: 'fbafa9ca1ce642e9b19738978503314a'
-          });
-          
-          var token="";
-    
-          // Retrieve an access token
-          spotifyApi.clientCredentialsGrant().then(
-            function(data) {
-              //console.log('The access token expires in ' + data.body['expires_in']);
-              //console.log('The access token is ' + data.body['access_token']);          
-              // Save the access token so that it's used in future calls
-              spotifyApi.setAccessToken(data.body['access_token']);
-                          
-                // Use the access token to retrieve information about the user connected to it
-                return spotifyApi.searchTracks(`${Artist} ${Track}`,  { limit : 50 });
-                })
-                .then(function(data) {
-                // Print some information about the results
-                return res.json(data.body.tracks);
-                console.log('I got ' + data.body.tracks.total + ' results!');
+              var m1 = await new matching(tracks, 0)
+              //console.log("m1 : ", m1)
+
+              if(m1.matchCount == 4)
+              { 
+                console.log("We have a Match")
+                //we need to find the track in the analyses table
+                trackData = await TrackAnalysis.findById(req.params.analysisID)
+                console.log("Track to Add BPM to : ", trackData)
+
+                const BPMUpdate = { BPM: Number((data.body.track.tempo).toFixed(0)) }
+                await trackData.updateOne(BPMUpdate)
+                await trackData.save()
+
+                const userUpdate = { users : ["***ALL***"] }
+                await trackData.updateOne(userUpdate)
+                var rSave = await trackData.save()
+                console.log("Succesful write to Analytics : ",rSave)
+
+                res.json({ Success : true })
+
+              }
+              else 
+              {
+                console.log(`Only ${m1.matchCount} Matched`)
+
+                trackData = await TrackAnalysis.findById(req.params.analysisID)
+                console.log("Track to Add BPM to : ", trackData)
+
+                const BPMUpdate = { BPM: Number((data.body.track.tempo).toFixed(0)) }
+                await trackData.updateOne(BPMUpdate)
+                await trackData.save()
+
+                var existingUsers = trackData.users
+                existingUsers.push(req.params.userID)
+                await trackData.updateOne({ users : existingUsers})
+                var rSave = await trackData.save()
+                console.log("Succesful write to Analytics : ",rSave)
+
+                res.json({ Success : true })
+              }
             
-                // Go through the first page of results
-                var firstPage = data.body.tracks.items;
-                //console.log(firstPage);
-                //console.log('The tracks in the first page are (popularity in parentheses):');
-                
-                
-                firstPage.forEach(function(track, index) {
-                    //console.log(index + ': '  + ' - ' + track.name + ' (' + track.popularity + ')');
-                    track.artists.forEach(function(artiste, Aindex)
-                    {
-                        console.log(index + ': ' + artiste.name + ' - ' + track.name + ' (' + track.id + ')');
-                        if((artiste.name.toLowerCase().trim() == Artist.toLowerCase().trim()) && (track.name.trim() == Track.trim()))
-                        {
-                            console.log("WE HAVE A MATCH");
-                            spotifyApi.getAudioAnalysisForTrack(`${track.id}`).then(
-                                function(data) 
-                                {
-                                    //console.log(data.body.track);
-                                    console.log("BPM IS : ",Number((data.body.track.tempo).toFixed(0)));  
-                                    console.log("Tempo Confidence IS : ",data.body.track.tempo_confidence);  
-                                    console.log("Key  IS : ",data.body.track.key);
-                                    console.log("Key confidence IS : ",data.body.track.key_confidence);      
-                                })
-                                
-                        }
-                        else
-                        { 
-                            console.log("NO MATCH");
-                        }
-                    })
-                });
-                }).catch(function(err) {
-                console.log('Something went wrong in the mainFlow:', err.message);
-                });  
-             
-            },
-            function(err) {
-              console.log(
-                'Something went wrong when retrieving an access token in the function getSpotifyToken()',
-                err.message
-              );
-            }
-          );        
+        })
+       }).catch(function(err) {
+          console.log('Something went wrong in GET Audio Analysis', err.message);
+          res.json({ Success : false, Message : err.message })
+          });  
+       
+      },
+      function(err) {
+        console.log(
+          'Something went wrong when retrieving an access token in the function gettingAudioAnalysis()',
+          err.message
+        );
         
-        
-               
-;
+      }
+    );      
 
+module.exports = router;
+
+/*
 function getSpotifyToken() 
 {   
-    const spotifyApi = new SpotifyWebApi({
-        clientId: 'fd323724c7db406187a9a00ff6519101',
-        clientSecret: 'fbafa9ca1ce642e9b19738978503314a'
-      });
+  const spotifyApi = new SpotifyWebApi({
+    clientId: process.env.SpotifyClientID,
+    clientSecret: process.env.SpotifyClientSecret
+  });
       
       var token="";
 
@@ -131,6 +150,5 @@ function getSpotifyToken()
           );
         }
       );
-}
-
-module.exports = router;
+} 
+*/

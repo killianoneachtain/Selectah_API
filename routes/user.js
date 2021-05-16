@@ -1,86 +1,123 @@
 var express = require('express');
-var router = express.Router();
-var Discogs = require('disconnect').Client;
 const cors = require('cors');
 const fs = require('fs');
+const Release = require('../models/release')
+const Tracklist = require('../models/tracklist')
+const TrackAnalysis = require('../models/trackAnalysis')
+const mongoUtil = require('../utilities/mongo');
+require('dotenv').config();
+
+//var selectah_db = app.mongo.getDb();
+
+var router = express.Router();
+var Discogs = require('disconnect').Client;
+const { title } = require('process');
 var db = new Discogs().database();
 
-var dis = new Discogs({
-	consumerKey: 'rSlgSvPFNYXtkYClvjLs', 
-	consumerSecret: 'QRabRHFedozJinKOvopMUCKeCepaCJLn'
-});
+/* GET Check a Username exists on Discogs */
+router.get('/check/:name', cors(), function(req,res, next) {
+  var col = new Discogs({userToken: process.env.Discogs_App_Token}).user();  
+  //console.log("The name to check is ", req.params.name)
+  col.getProfile(req.params.name, function(err,data) {
+    res.json(data);
+  } )
+})
 
-var collectorsItems= [];
-var noOfPages=0;
-var completeCollection="";
+/* GET users pagination details. */
+router.get('/pagination/:userName/:perPage/:orderBy', cors(), function(req, res, next) {  
+  var col = new Discogs({userToken: process.env.Discogs_App_Token}).user().collection();
 
-/* GET users listing. */
-router.get('/', cors(), function(req, res, next) {
-  res.render('user', { title: 'USER : Killian' });
-});
-
-router.get('/collection', cors(), function(req, res, next) {  
-    var col = new Discogs({userToken: 'lYVtKyeISQGrTaFWvhONqkFfvbexIAIsrNiJhvAf'}).user().collection();
-  
-    col.getReleases('konsouloz', 0, {per_page:50, sort:"added"},
-    function(err, data){
-        noOfPages =data.pagination.pages;   
-        console.log(err);
-       // console.log(noOfPages);   
-        //completeCollection = getAllReleases(parseInt(noOfPages))
-        res.json(data); 
-        //res.json(data.releases);
-    });  
-});
-
-function getAllReleases(pages)
-{
-     //noOfPages =data.pagination.pages;   
-        //console.log(noOfPages);
-  var col = new Discogs({userToken: 'lYVtKyeISQGrTaFWvhONqkFfvbexIAIsrNiJhvAf'}).user().collection();
-
-  var strings="";
-  var news="";
-  var together = "";
-  console.log(" I is : ", pages);
-
-    for(i = 1;i<=pages;i++)
-    {
-    //console.log("length of strings",strings.length);
-     col.getReleases('konsouloz', 0, {page: `${i}`, per_page:50},
-    function(err, data){
-        news = JSON.stringify(data.releases); 
-        news = news.substring(1);
-        var n = news.lastIndexOf("]");
-        news = news.substring(0,n) + ',';
-        console.log("length of news now is : ",news.length);     
-        strings += news;   
-        console.log("length of strings",strings.length); 
-        
-        console.log("i : ", i);
-        console.log("pages", pages);
-        
-        if(i>pages)
-        {
-          var l = strings.length;
-          var set = `[${strings}]`;
-          strings = JSON.parse(set);
-          console.log("SET : ",strings);
-        } 
-        });  
-    } 
-    return strings;  
-   };
-
-   /* GET releases track listing. */
-router.get('/release/:releaseId', cors(), function(req, res, next) {
-  var dis = new Discogs('MyUserAgent/1.0', {userToken: 'lYVtKyeISQGrTaFWvhONqkFfvbexIAIsrNiJhvAf'});
-   db.getRelease(req.params.releaseId, function(err, data){ 
-        res.json(data);
+  col.getReleases(req.params.userName, 0, {per_page: req.params.perPage, sort:req.params.orderBy},
+  function(err, data){               
+      res.json(data.pagination);         
   });  
 });
 
-router.get('/genres/', cors(), function(req, res, next) {
+
+/* GET users collection by page number  */
+router.get('/:userName/collection/:orderBy/:perPage/:pageNumber', cors(), function(req, res, next) {  
+  var col = new Discogs({userToken: process.env.Discogs_App_Token}).user().collection();
+  
+  col.getReleases(req.params.userName, 0, {per_page:req.params.perPage, sort: req.params.orderBy, page:req.params.pageNumber},
+  function(err, data){  
+      res.json(data);         
+  });  
+});
+
+router.get('/release/trackAnalysis/:releaseID', cors(), async function(req, res) {  
+  console.log(`Release ID for TrackAnaylsis : ${req.params.releaseID}`)
+ 
+  var data = await TrackAnalysis.findByRelease(req.params.releaseID)
+  res.json(data)         
+ 
+});
+
+/* GET releases track listing by Discogs Release id.
+ * If the Discogs Release ID is found in the Selecta: Releases
+ * database, then the Atlas record is returned to the app.
+*/ 
+   router.get('/release/:releaseID', cors(), async function(req, res, next) 
+   {
+    //var dis = new Discogs('MyUserAgent/1.0', {userToken: process.env.Discogs_App_Token});
+    var releaseData = [];
+
+    data = await Release.findByDiscogsID(req.params.releaseID);
+    //console.log("data for initial check", data)
+    
+    if(data === null)
+      {
+          db.getRelease(req.params.releaseID, async function(err, data){ 
+          releaseData = await data
+          
+          data = await Release.findByDiscogsID(releaseData.id)          
+
+          if(data == null)
+            {
+          
+              data = releaseData;
+              //console.log("data is", data);
+              data.tracklist.forEach(async function(track) {
+                
+                const newTrackAnalysis = new TrackAnalysis({
+                  releaseID: req.params.releaseID, 
+                  position: track.position,
+                  title: track.title,
+                  user: [],
+                  BPM: 0,
+                  BPMConfidence: 1,
+                  Key: "D",
+                  KeyConfidence: 1,
+                  Date: Date.now()
+                });
+
+                var tracks = await newTrackAnalysis.save()
+                console.log("New Audio analysis added for ", data.id, " : ", tracks)                              
+            }) 
+
+            const newRelease = new Release({
+              Discogs_id: data.id,
+              artists: data.artists,
+              artists_sort: data.artists_sort,
+              date_changed: data.date_changed,
+              master_id: data.master_id,
+              title: data.title,
+              genres: data.genres,
+              styles: data.styles,
+              tracklist: data.tracklist//tracklistArray
+            });
+              var release = await newRelease.save();
+              console.log("New Release Added", release);
+            }
+            res.json(data);          
+          });  
+      }
+      else 
+      { 
+        res.json(data);
+      }       
+  });
+
+router.get('/genres', cors(), function(req, res, next) {
     var genres = [ {"genres": [      
       { id: 1, name:"Electronic" },
       { id: 2, name:"Hip Hop" },
@@ -93,7 +130,7 @@ router.get('/genres/', cors(), function(req, res, next) {
         ]
       }
     ];  
-    res.json(genres[0]);    
+    res.json(genres.genres);    
   });  
 
 
