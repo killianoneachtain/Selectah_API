@@ -47,7 +47,7 @@ router.get('/:userName/collection/:pageNumber', cors(), function(req, res, next)
 router.get('/release/trackAnalysis/:releaseID', cors(), async function(req, res) {  
   console.log(`Release ID for TrackAnaylsis : ${req.params.releaseID}`)
  
-  let data = await TrackAnalysis.findByRelease(req.params.releaseID)
+  var data = await TrackAnalysis.findByRelease(req.params.releaseID)
   res.json(data)         
  
 });
@@ -90,7 +90,7 @@ router.get('/release/trackAnalysis/:releaseID', cors(), async function(req, res)
                   Date: Date.now()
                 });
 
-                let tracks = await newTrackAnalysis.save()
+                var tracks = await newTrackAnalysis.save()
                 console.log("New Audio analysis added for ", data.id, " : ", tracks)                              
             }) 
 
@@ -105,7 +105,7 @@ router.get('/release/trackAnalysis/:releaseID', cors(), async function(req, res)
               styles: data.styles,
               tracklist: data.tracklist//tracklistArray
             });
-              let release = await newRelease.save();
+              var release = await newRelease.save();
               console.log("New Release Added", release);
             }
             res.json(data);          

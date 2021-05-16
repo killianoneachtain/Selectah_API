@@ -19,11 +19,11 @@ router.get('/:userID/:artistName/:albumTitle/:trackTitle/:trackID/:analysisID', 
   console.log("Track id :", req.params.trackID)
   console.log("Analysis ID :", req.params.analysisID)
 
-  let TrackName = req.params.trackTitle;
-  let Mix = "";
+  var TrackName = req.params.trackTitle;
+  var Mix = "";
   if(TrackName.includes("("))
   {
-    let temp = TrackName.split('(')[0].trim();
+    var temp = TrackName.split('(')[0].trim();
     Mix = TrackName.split('(')[1].split(')')[0].trim();
     TrackName = temp.trim();
   }
@@ -57,13 +57,13 @@ router.get('/:userID/:artistName/:albumTitle/:trackTitle/:trackID/:analysisID', 
               source: "Spotify",
               spotifyID: req.params.trackID
               });
-              let trck = await newTrack.save();
+              var trck = await newTrack.save();
               //console.log("track saved : ", trck);
 
               // search the DB for the two tracsk
-              let tracks = await Track.findByUserID(req.params.userID)
+              var tracks = await Track.findByUserID(req.params.userID)
 
-              let m1 = await new matching(tracks, 0)
+              var m1 = await new matching(tracks, 0)
               //console.log("m1 : ", m1)
 
               if(m1.matchCount == 4)
@@ -79,7 +79,7 @@ router.get('/:userID/:artistName/:albumTitle/:trackTitle/:trackID/:analysisID', 
 
                 const userUpdate = { users : ["***ALL***"] }
                 await trackData.updateOne(userUpdate)
-                let rSave = await trackData.save()
+                var rSave = await trackData.save()
                 console.log("Succesful write to Analytics : ",rSave)
 
                 res.json({ Success : true })
@@ -96,10 +96,10 @@ router.get('/:userID/:artistName/:albumTitle/:trackTitle/:trackID/:analysisID', 
                 await trackData.updateOne(BPMUpdate)
                 await trackData.save()
 
-                let existingUsers = trackData.users
+                var existingUsers = trackData.users
                 existingUsers.push(req.params.userID)
                 await trackData.updateOne({ users : existingUsers})
-                let rSave = await trackData.save()
+                var rSave = await trackData.save()
                 console.log("Succesful write to Analytics : ",rSave)
 
                 res.json({ Success : true })

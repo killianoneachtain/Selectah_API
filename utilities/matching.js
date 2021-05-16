@@ -94,16 +94,16 @@ module.exports = function (tracks, matchcount ) {
                 console.log("Mixes are : ", mixes)
 
                 mixes.forEach(function(mix) {
-                    let mixName = mix
+                    var mixName = mix
                     if (mixName.includes("Discogs"))
                     {
-                        let variation = mixName.split(":")[1].trim()
+                        var variation = mixName.split(":")[1].trim()
                         console.log("variation is ", variation)
 
                         if(variation.includes(" "))
                         {
-                            let variations = variation.split(" ")
-                            let matches = 0                           
+                            var variations = variation.split(" ")
+                            var matches = 0                           
 
                             variations.forEach(function(variety) {
                                 if(versions.indexOf(variety) > -1) {
@@ -116,8 +116,8 @@ module.exports = function (tracks, matchcount ) {
                                 this.matchCount = 4  
                             }
                         } else {                            
-                                let variations = [variation]
-                                let matches = 0                           
+                                var variations = [variation]
+                                var matches = 0                           
     
                                 variations.forEach(function(variety) {
                                     if(versions.indexOf(variety) > -1) {
