@@ -24,10 +24,10 @@ router.get('/check/:name', cors(), function(req,res, next) {
 })
 
 /* GET users pagination details. */
-router.get('/pagination/:userName/', cors(), function(req, res, next) {  
+router.get('/pagination/:userName/:perPage/:orderBy', cors(), function(req, res, next) {  
   var col = new Discogs({userToken: process.env.Discogs_App_Token}).user().collection();
 
-  col.getReleases(req.params.userName, 0, {per_page:50, sort:"added"},
+  col.getReleases(req.params.userName, 0, {per_page: req.params.perPage, sort:req.params.orderBy},
   function(err, data){               
       res.json(data.pagination);         
   });  
@@ -35,10 +35,10 @@ router.get('/pagination/:userName/', cors(), function(req, res, next) {
 
 
 /* GET users collection by page number  */
-router.get('/:userName/collection/:pageNumber', cors(), function(req, res, next) {  
+router.get('/:userName/collection/:orderBy/:perPage/:pageNumber', cors(), function(req, res, next) {  
   var col = new Discogs({userToken: process.env.Discogs_App_Token}).user().collection();
   
-  col.getReleases(req.params.userName, 0, {per_page:50, sort:"added", page:req.params.pageNumber},
+  col.getReleases(req.params.userName, 0, {per_page:req.params.perPage, sort: req.params.orderBy, page:req.params.pageNumber},
   function(err, data){  
       res.json(data);         
   });  
