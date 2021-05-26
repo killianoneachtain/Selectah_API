@@ -8,7 +8,7 @@ var TrackSchema = new mongoose.Schema({
     trackName: {type: String},
     mix: {type: String},
     source: {type: String},
-    spotifyID: {tpye: String}
+    spotifyID: {type: String}
   });
 
   TrackSchema.statics.findByDiscogsID = function(releaseID) {

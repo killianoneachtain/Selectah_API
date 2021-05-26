@@ -2,7 +2,6 @@ var express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const Release = require('../models/release')
-const Tracklist = require('../models/tracklist')
 const TrackAnalysis = require('../models/trackAnalysis')
 const mongoUtil = require('../utilities/mongo');
 require('dotenv').config();
@@ -44,10 +43,11 @@ router.get('/:userName/collection/:orderBy/:perPage/:pageNumber', cors(), functi
   });  
 });
 
-router.get('/release/trackAnalysis/:releaseID', cors(), async function(req, res) {  
-  console.log(`Release ID for TrackAnaylsis : ${req.params.releaseID}`)
- 
+router.get('/trackAnalysis/:releaseID', cors(), async function(req, res) {  
+  console.log(`Release ID for TrackAnaylsis : ${req.params.releaseID}`)  
+
   var data = await TrackAnalysis.findByRelease(req.params.releaseID)
+  console.log("Track Analysis Data :", data)
   res.json(data)         
  
 });
