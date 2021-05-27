@@ -102,7 +102,7 @@ router.get('/trackAnalysis/:releaseID', cors(), async function(req, res) {
               title: data.title,
               genres: data.genres,
               styles: data.styles,
-              tracklist: data.tracklist//tracklistArray
+              tracklist: data.tracklist
             });
               var release = await newRelease.save();
               console.log("New Release Added", release);

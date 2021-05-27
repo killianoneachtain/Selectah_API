@@ -88,6 +88,7 @@ router.get('/match/:userID/:artistName/:albumTitle/:trackTitle/:trackID/:analysi
               else 
               {
                 console.log(`Only ${m1.matchCount} Matched`)
+                console.log("Matching trackanalysis id : ", req.params.analysisID)
 
                 trackData = await TrackAnalysis.findById(req.params.analysisID)
                 console.log("Track to Add BPM to : ", trackData)
@@ -107,7 +108,7 @@ router.get('/match/:userID/:artistName/:albumTitle/:trackTitle/:trackID/:analysi
             
         })
        }).catch(function(err) {
-          console.log('Something went wrong in GET Audio Analysis', err.message);
+          console.log('Something went wrong in GET Audio Analysis : ', err.message);
           res.json({ Success : false, Message : err.message })
           });  
        

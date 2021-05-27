@@ -33,7 +33,8 @@ TrackAnalysisSchema.statics.findByKey = function(Key) {
   };
   
 TrackAnalysisSchema.statics.findByID = async function(id) {
-    return await this.findOne({ _id : id});
+  console.log("finding Track by ID analyses for : ", id, "Number : ", Number(id));
+    return await this.findOne({ _id : Number(id)});
   };
 
 TrackAnalysisSchema.statics.findByType = function(type) {

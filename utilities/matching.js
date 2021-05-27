@@ -134,7 +134,7 @@ module.exports = function (tracks, matchcount ) {
 
         break;
 
-        default: 
+        case 0: 
         console.log("DEFAULT : Nothing Matched")
         break;
     }
