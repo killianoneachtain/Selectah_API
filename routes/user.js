@@ -75,7 +75,7 @@ router.get('/trackAnalysis/:releaseID', cors(), async function(req, res) {
             {
           
               data = releaseData;
-              //console.log("data is", data);
+              console.log("data is", data);
               data.tracklist.forEach(async function(track) {
                 
                 const newTrackAnalysis = new TrackAnalysis({
@@ -89,7 +89,6 @@ router.get('/trackAnalysis/:releaseID', cors(), async function(req, res) {
                   KeyConfidence: 1,
                   Date: Date.now()
                 });
-
                 var tracks = await newTrackAnalysis.save()
                 console.log("New Audio analysis added for ", data.id, " : ", tracks)                              
             }) 
@@ -113,6 +112,7 @@ router.get('/trackAnalysis/:releaseID', cors(), async function(req, res) {
       }
       else 
       { 
+        console.log("This is Selectah Data returned", data)
         res.json(data);
       }       
   });
