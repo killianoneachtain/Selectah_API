@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
  */
 
 const TrackAnalysisSchema = new mongoose.Schema({ 
-    releaseID: {type: String, required: true}, 
+    releaseID: {type: String}, 
     position: {type: String},
     title: {type: String, required: true},
     users: {type: Array},
@@ -20,6 +20,7 @@ TrackAnalysisSchema.statics.findByUser = function(user) {
 };
 
 TrackAnalysisSchema.statics.findByRelease = function(releaseID) {
+  console.log("finding Track analyses for : ", releaseID);
     return this.find({ releaseID: releaseID });
   };
 

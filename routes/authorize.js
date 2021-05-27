@@ -12,7 +12,7 @@ router.get('/', cors(), function(req, res,next){
 	oAuth.getRequestToken(
 		'rSlgSvPFNYXtkYClvjLs', 
 		'QRabRHFedozJinKOvopMUCKeCepaCJLn', 
-		'https://selectah.vercel.app', 
+		'http://localhost:3000', 
 		function(err, requestData){
 			// Persist "requestData" here so that the callback handler can 
 			// access it later after returning from the authorize url

@@ -10,7 +10,7 @@ const Release = require('../models/release')
 const TrackAnalysis = require('../models/trackAnalysis')
 
 /* GET Track Audio Analysis */
-router.get('/:userID/:artistName/:albumTitle/:trackTitle/:trackID/:analysisID', cors(), async function (req, res,next) {
+router.get('/match/:userID/:artistName/:albumTitle/:trackTitle/:trackID/:analysisID', cors(), async function (req, res,next) {
   
   console.log("UserID : ", req.params.userID)
   console.log("Artist  :", req.params.artistName)
