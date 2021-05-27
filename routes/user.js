@@ -2,7 +2,6 @@ var express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const Release = require('../models/release')
-const Tracklist = require('../models/tracklist')
 const TrackAnalysis = require('../models/trackAnalysis')
 const mongoUtil = require('../utilities/mongo');
 require('dotenv').config();
@@ -44,10 +43,11 @@ router.get('/:userName/collection/:orderBy/:perPage/:pageNumber', cors(), functi
   });  
 });
 
-router.get('/release/trackAnalysis/:releaseID', cors(), async function(req, res) {  
-  console.log(`Release ID for TrackAnaylsis : ${req.params.releaseID}`)
- 
+router.get('/trackAnalysis/:releaseID', cors(), async function(req, res) {  
+  console.log(`Release ID for TrackAnaylsis : ${req.params.releaseID}`)  
+
   var data = await TrackAnalysis.findByRelease(req.params.releaseID)
+  console.log("Track Analysis Data :", data)
   res.json(data)         
  
 });
@@ -75,7 +75,7 @@ router.get('/release/trackAnalysis/:releaseID', cors(), async function(req, res)
             {
           
               data = releaseData;
-              //console.log("data is", data);
+              console.log("data is", data);
               data.tracklist.forEach(async function(track) {
                 
                 const newTrackAnalysis = new TrackAnalysis({
@@ -89,7 +89,6 @@ router.get('/release/trackAnalysis/:releaseID', cors(), async function(req, res)
                   KeyConfidence: 1,
                   Date: Date.now()
                 });
-
                 var tracks = await newTrackAnalysis.save()
                 console.log("New Audio analysis added for ", data.id, " : ", tracks)                              
             }) 
@@ -103,7 +102,7 @@ router.get('/release/trackAnalysis/:releaseID', cors(), async function(req, res)
               title: data.title,
               genres: data.genres,
               styles: data.styles,
-              tracklist: data.tracklist//tracklistArray
+              tracklist: data.tracklist
             });
               var release = await newRelease.save();
               console.log("New Release Added", release);
@@ -113,6 +112,7 @@ router.get('/release/trackAnalysis/:releaseID', cors(), async function(req, res)
       }
       else 
       { 
+        console.log("This is Selectah Data returned", data)
         res.json(data);
       }       
   });

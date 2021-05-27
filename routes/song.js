@@ -10,7 +10,7 @@ const Release = require('../models/release')
 const TrackAnalysis = require('../models/trackAnalysis')
 
 /* GET Track Audio Analysis */
-router.get('/:userID/:artistName/:albumTitle/:trackTitle/:trackID/:analysisID', cors(), async function (req, res,next) {
+router.get('/match/:userID/:artistName/:albumTitle/:trackTitle/:trackID/:analysisID', cors(), async function (req, res,next) {
   
   console.log("UserID : ", req.params.userID)
   console.log("Artist  :", req.params.artistName)
@@ -88,6 +88,7 @@ router.get('/:userID/:artistName/:albumTitle/:trackTitle/:trackID/:analysisID', 
               else 
               {
                 console.log(`Only ${m1.matchCount} Matched`)
+                console.log("Matching trackanalysis id : ", req.params.analysisID)
 
                 trackData = await TrackAnalysis.findById(req.params.analysisID)
                 console.log("Track to Add BPM to : ", trackData)
@@ -107,7 +108,7 @@ router.get('/:userID/:artistName/:albumTitle/:trackTitle/:trackID/:analysisID', 
             
         })
        }).catch(function(err) {
-          console.log('Something went wrong in GET Audio Analysis', err.message);
+          console.log('Something went wrong in GET Audio Analysis : ', err.message);
           res.json({ Success : false, Message : err.message })
           });  
        

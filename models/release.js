@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const ReleaseSchema = new mongoose.Schema({  
-    Discogs_id: {type: Number, required: true},
+    Discogs_id: {type: String, required: true},
     artists: Array,
     artists_sort: String,
     date_changed: String,
@@ -15,6 +15,7 @@ const ReleaseSchema = new mongoose.Schema({
   //[{ type: mongoose.Schema.Types.ObjectId, ref: 'TracklistEntry' }]
 
 ReleaseSchema.statics.findByDiscogsID = function(Discogs_id) {
+  console.log("looking for", Discogs_id)
   return this.findOne({ Discogs_id : Discogs_id});
 };
 
