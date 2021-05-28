@@ -1,11 +1,10 @@
 
 //Import the mongoose module
-const mongoose = require('mongoose');
-const Release = require('../models/release')
-require('dotenv').config();
-mongoose.set('useNewUrlParser', true);
-mongoose.set('useFindAndModify', false);
-mongoose.set('useCreateIndex', true);
+const mongoose = require('mongoose')
+require('dotenv').config()
+mongoose.set('useNewUrlParser', true)
+mongoose.set('useFindAndModify', false)
+mongoose.set('useCreateIndex', true)
 
 var db;
 
