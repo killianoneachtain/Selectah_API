@@ -4,8 +4,9 @@
   "description": "Selectah API",
   "private": true,
   "author": "Killian O Neachtain",
-  "scripts": {    
-    "start": "node ./src/bin/www.js"  
+  "scripts": {
+    "start": "node ./src/bin/www",
+    "heroku-postbuild": "npm start"
   },
   "engines": {
     "node": "14.x",

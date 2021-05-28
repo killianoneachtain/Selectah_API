@@ -53,6 +53,10 @@ type Options = {
    * Ensure file ends with a newline. Default: `true`
    */
   appendNewline?: boolean;
+  /**
+   * Write even if file already exists. Default: `true`
+   */
+  overwrite?: boolean;
 }
 ```
 
