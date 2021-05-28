@@ -87,9 +87,18 @@ router.get('/:userID/:releaseID/:songArtist/:albumTitle/:songTitle', cors(), asy
                 // Use the access token to retrieve information about the user connected to it
                 return await spotifyApi.searchTracks(`artist:${Artist.toLowerCase()} track:${TrackName.toLowerCase()}`,  { limit : 50 });
                 })
-                .then(function(data) 
+                .then(async function(data) 
                 {
-                // Print some information about the results
+                  if(data.body.tracks.items.length < 1)
+                  {                   
+                    
+                      data = await spotifyApi.searchTracks(`artist:${Artist.toLowerCase()} track:${TrackName.toLowerCase().replace("ing", "in")}`,  { limit : 50 });
+                      return res.json(data.body.tracks); 
+                    }                  
+                  
+
+
+                  // Print some information about the results
                   console.log('There are ' + data.body.tracks.total + ' results!');
                   //console.log(data.body.tracks)
                   return res.json(data.body.tracks); 
