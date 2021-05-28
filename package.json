@@ -6,7 +6,7 @@
   "author": "Killian O Neachtain",
   "scripts": {
     "start": "node ./src/bin/www",
-    "heroku-postbuild": "node ./src/bin/www"
+    "heroku-postbuild": "npm run build"
   },
   "engines": {
     "node": "14.x",
