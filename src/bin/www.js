@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-'use strict';
+
 /**
  * Module dependencies.
  */
 
-var app = require('../app');
+var app = require('../../app');
 var debug = require('debug')('express:server');
 var http = require('http');
 
@@ -12,7 +12,7 @@ var http = require('http');
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '9000');
+const port = normalizePort(process.env.PORT || '9000');
 app.set('port', port);
 
 /**
