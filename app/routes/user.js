@@ -3,7 +3,7 @@ const cors = require('cors');
 const fs = require('fs');
 const Release = require('../models/release')
 const TrackAnalysis = require('../models/trackAnalysis')
-const mongoUtil = require('../app/utilities/mongo');
+const mongoUtil = require('../utilities/mongo');
 require('dotenv').config();
 
 

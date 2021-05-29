@@ -3,7 +3,7 @@ var express = require('express');
 var app = express();
 require('dotenv').config();
 
-var mongo = require('./app/utilities/mongo');
+var mongo = require('./utilities/mongo');
 
 mongo.connectToServer( function( err, client ) {
   if (err) console.log(err);

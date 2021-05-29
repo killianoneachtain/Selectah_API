@@ -5,7 +5,7 @@ const fs = require('fs');
 const SpotifyWebApi = require('spotify-web-api-node');
 const Track = require('../models/track');
 require('dotenv').config();
-const matching = require('../app/utilities/matching')
+const matching = require('../utilities/matching')
 const Release = require('../models/release')
 const TrackAnalysis = require('../models/trackAnalysis')
 
