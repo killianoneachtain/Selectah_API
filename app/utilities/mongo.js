@@ -17,6 +17,7 @@ connectToServer: function ( callback ) {
     mongoose.connect(process.env.selectahDataBase, {useNewUrlParser: true, useUnifiedTopology: true},
         function ( err, client ) {
         db = mongoose.connection;
+        console.log("Connected to MongoDB/selectah")
         db.on('error', console.error.bind(console, 'MongoDB connection error:'));
         return callback( err);
     } ); 
